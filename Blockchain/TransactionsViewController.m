@@ -18,7 +18,7 @@
 @synthesize latestBlock;
 
 BOOL animateNextCell;
-
+NSMutableArray *expandedCellsMutableArray;
 UIRefreshControl *refreshControl;
 int lastNumberTransactions = INT_MAX;
 
@@ -29,6 +29,10 @@ int lastNumberTransactions = INT_MAX;
 
 - (UITableViewCell *)tableView:(UITableView *)_tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if ([expandedCellsMutableArray[indexPath.row] boolValue] == YES) {
+        // configure expanded cell
+    }
+    
     Transaction * transaction = [data.transactions objectAtIndex:[indexPath row]];
     
 	TransactionTableCell * cell = (TransactionTableCell*)[tableView dequeueReusableCellWithIdentifier:@"transaction"];
@@ -51,10 +55,9 @@ int lastNumberTransactions = INT_MAX;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    TransactionTableCell *cell = (TransactionTableCell *)[self.tableView cellForRowAtIndexPath:indexPath];
-    [cell transactionClicked:nil];
-    
+    expandedCellsMutableArray[indexPath.row] = [NSNumber numberWithBool:![expandedCellsMutableArray[indexPath.row] boolValue]];
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
 }
 
 - (void)drawRect:(CGRect)rect
@@ -69,6 +72,9 @@ int lastNumberTransactions = INT_MAX;
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (indexPath.row < [expandedCellsMutableArray count] && [expandedCellsMutableArray[indexPath.row] boolValue]) {
+        return 300;
+    }
     return 65;
 }
 
@@ -129,6 +135,11 @@ int lastNumberTransactions = INT_MAX;
 
 - (void)reload
 {
+    NSInteger numberOfTransactions = [data.transactions count];
+    for (int i = 0; i < numberOfTransactions; i++) {
+        [expandedCellsMutableArray addObject:[NSNumber numberWithBool:NO]];
+    }
+    
     [self setText];
     
     [tableView reloadData];
@@ -196,6 +207,8 @@ int lastNumberTransactions = INT_MAX;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    expandedCellsMutableArray = [[NSMutableArray alloc] init];
     
     self.view.frame = CGRectMake(0, 0, app.window.frame.size.width,
                                  app.window.frame.size.height - DEFAULT_HEADER_HEIGHT - DEFAULT_FOOTER_HEIGHT);
