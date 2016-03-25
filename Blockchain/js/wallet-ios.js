@@ -172,20 +172,13 @@ MyWalletPhone.getIndexOfActiveAccount = function(num) {
     return realNum;
 };
 
-MyWalletPhone.getDefaultAccountIndex = function(isActiveOnly) {
+MyWalletPhone.getDefaultAccountIndex = function() {
     if (!MyWallet.wallet.isUpgradedToHD) {
         console.log('Warning: Getting accounts when wallet has not upgraded!');
         return 0;
     }
     
-    var shouldUseActiveAccounts = Boolean(isActiveOnly);
-
-    var accounts;
-    if (shouldUseActiveAccounts) {
-        accounts = MyWallet.wallet.hdwallet.activeAccounts;
-    } else {
-        accounts = MyWallet.wallet.hdwallet.accounts;
-    }
+    var accounts = MyWallet.wallet.hdwallet.accounts;
     
     var index = MyWallet.wallet.hdwallet.defaultAccountIndex;
 
@@ -278,6 +271,19 @@ MyWalletPhone.isAccountNameValid = function(name) {
     return true;
 }
 
+MyWalletPhone.isAddressAvailable = function(address) {
+    return MyWallet.wallet.key(address) != null && !MyWallet.wallet.key(address).archived;
+}
+
+MyWalletPhone.isAccountAvailable = function(num) {
+    if (!MyWallet.wallet.isUpgradedToHD) {
+        console.log('Warning: Getting accounts when wallet has not upgraded!');
+        return false;
+    }
+
+    return MyWallet.wallet.hdwallet.accounts[num] != null && !MyWallet.wallet.hdwallet.accounts[num].archived;
+}
+
 MyWalletPhone.getReceivingAddressForAccount = function(num) {
     if (!MyWallet.wallet.isUpgradedToHD) {
         console.log('Warning: Getting accounts when wallet has not upgraded!');
@@ -338,11 +344,7 @@ MyWalletPhone.createNewPayment = function() {
 
 MyWalletPhone.changePaymentFrom = function(from) {
     if (currentPayment) {
-        if (Helpers.isNumber(from)) {
-            currentPayment.from(MyWalletPhone.getIndexOfActiveAccount(from));
-        } else {
-            currentPayment.from(from);
-        }
+        currentPayment.from(from);
     } else {
         console.log('Payment error: null payment object!');
     }
@@ -350,11 +352,7 @@ MyWalletPhone.changePaymentFrom = function(from) {
 
 MyWalletPhone.changePaymentTo = function(to) {
     if (currentPayment) {
-        if (Helpers.isNumber(to)) {
-            currentPayment.to(MyWalletPhone.getIndexOfActiveAccount(to));
-        } else {
-            currentPayment.to(to);
-        }
+        currentPayment.to(to);
     } else {
         console.log('Payment error: null payment object!');
     }

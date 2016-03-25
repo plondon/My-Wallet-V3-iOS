@@ -129,7 +129,7 @@ BOOL displayingLocalSymbolSend;
     if ([app.wallet hasAccount]) {
         // Default setting: send from default account
         self.sendFromAddress = false;
-        int defaultAccountIndex = [app.wallet getDefaultAccountIndexActiveOnly:YES];
+        int defaultAccountIndex = [app.wallet getDefaultAccountIndex];
         self.fromAccount = defaultAccountIndex;
         [self didSelectFromAccount:self.fromAccount];
     }
@@ -184,6 +184,39 @@ BOOL displayingLocalSymbolSend;
     self.recommendedFees = nil;
     
     [self changeToDefaultFeeMode];
+}
+
+- (void)reloadAfterMultiAddressResponse
+{
+    if ([self needsReload]) {
+        [self reload];
+    } else {
+        [self reloadFromAndToFields];
+    }
+}
+
+- (BOOL)needsReload
+{
+    BOOL fromChanged = NO;
+    BOOL toChanged = NO;
+    
+    if (self.sendFromAddress) {
+        if ([self.fromAddress isEqualToString:@""]) {
+            fromChanged = NO;
+        } else {
+            fromChanged = ![app.wallet isAddressAvailable:self.fromAddress];
+        }
+    } else {
+        fromChanged = ![app.wallet isAccountAvailable:self.fromAccount];
+    }
+    
+    if (self.sendToAddress) {
+        toChanged = ![app.wallet isBitcoinAddress:self.toAddress];
+    } else {
+        toChanged = ![app.wallet isAccountAvailable:self.toAccount];
+    }
+    
+    return fromChanged || toChanged;
 }
 
 - (void)hideSelectFromAndToButtonsIfAppropriate
@@ -241,8 +274,8 @@ BOOL displayingLocalSymbolSend;
         }
     }
     else {
-        selectAddressTextField.text = [app.wallet getLabelForAccount:self.fromAccount activeOnly:YES];
-        availableAmount = [app.wallet getBalanceForAccount:self.fromAccount activeOnly:YES];
+        selectAddressTextField.text = [app.wallet getLabelForAccount:self.fromAccount];
+        availableAmount = [app.wallet getBalanceForAccount:self.fromAccount];
     }
 }
 
@@ -258,7 +291,7 @@ BOOL displayingLocalSymbolSend;
         }
     }
     else {
-        toField.text = [app.wallet getLabelForAccount:self.toAccount activeOnly:YES];
+        toField.text = [app.wallet getLabelForAccount:self.toAccount];
         [self didSelectToAccount:self.toAccount];
     }
 }
@@ -312,7 +345,7 @@ BOOL displayingLocalSymbolSend;
         [self didSelectFromAddress:address];
     }
     
-    [self didSelectToAccount:[app.wallet getDefaultAccountIndexActiveOnly:YES]];
+    [self didSelectToAccount:[app.wallet getDefaultAccountIndex]];
     
     [app.wallet sweepPaymentRegularThenConfirm];
 }
@@ -374,6 +407,8 @@ BOOL displayingLocalSymbolSend;
              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * ANIMATION_DURATION * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                  [app.transactionsViewController.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
              });
+             
+             [self reload];
          };
          
          listener.on_error = ^(NSString* error) {
@@ -509,7 +544,7 @@ BOOL displayingLocalSymbolSend;
         uint64_t amountTotal = amountInSatoshi + self.feeFromTransactionProposal + self.dust;
         uint64_t feeTotal = self.dust + self.feeFromTransactionProposal;
         
-        NSString *fromAddressLabel = self.sendFromAddress ? [self labelForLegacyAddress:self.fromAddress] : [app.wallet getLabelForAccount:self.fromAccount activeOnly:YES];
+        NSString *fromAddressLabel = self.sendFromAddress ? [self labelForLegacyAddress:self.fromAddress] : [app.wallet getLabelForAccount:self.fromAccount];
         
         NSString *fromAddressString = self.sendFromAddress ? self.fromAddress : @"";
         
@@ -522,7 +557,7 @@ BOOL displayingLocalSymbolSend;
             fromAddressLabel = @"";
         }
         
-        NSString *toAddressLabel = self.sendToAddress ? [self labelForLegacyAddress:self.toAddress] : [app.wallet getLabelForAccount:self.toAccount activeOnly:YES];
+        NSString *toAddressLabel = self.sendToAddress ? [self labelForLegacyAddress:self.toAddress] : [app.wallet getLabelForAccount:self.toAccount];
         NSString *toAddressString = self.sendToAddress ? self.toAddress : @"";
         
         // When a legacy wallet has no label, labelForLegacyAddress returns the address, so remove the string
@@ -1045,11 +1080,11 @@ BOOL displayingLocalSymbolSend;
 {
     self.sendFromAddress = false;
     
-    availableAmount = [app.wallet getBalanceForAccount:account activeOnly:YES];
+    availableAmount = [app.wallet getBalanceForAccount:account];
     
-    selectAddressTextField.text = [app.wallet getLabelForAccount:account activeOnly:YES];
+    selectAddressTextField.text = [app.wallet getLabelForAccount:account];
     self.fromAccount = account;
-    DLog(@"fromAccount: %@", [app.wallet getLabelForAccount:account activeOnly:YES]);
+    DLog(@"fromAccount: %@", [app.wallet getLabelForAccount:account]);
     
     [app.wallet changePaymentFromAccount:account];
     
@@ -1062,10 +1097,10 @@ BOOL displayingLocalSymbolSend;
 {
     self.sendToAddress = false;
     
-    toField.text = [app.wallet getLabelForAccount:account activeOnly:YES];
+    toField.text = [app.wallet getLabelForAccount:account];
     self.toAccount = account;
     self.toAddress = @"";
-    DLog(@"toAccount: %@", [app.wallet getLabelForAccount:account activeOnly:YES]);
+    DLog(@"toAccount: %@", [app.wallet getLabelForAccount:account]);
     
     [app.wallet changePaymentToAccount:account];
     

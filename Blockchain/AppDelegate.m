@@ -278,6 +278,21 @@ void (^secondPasswordSuccess)(NSString *);
     [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_KEY_NEW_ADDRESS object:nil userInfo:nil];
 }
 
+- (void)reloadAfterMultiAddressResponse
+{
+    [_sendViewController reloadAfterMultiAddressResponse];
+    [_transactionsViewController reload];
+    [_receiveViewController reload];
+    [_settingsNavigationController reload];
+    [_accountsAndAddressesNavigationController reload];
+    
+    [sideMenuViewController reload];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_KEY_RELOAD_TO_DISMISS_VIEWS object:nil];
+    // Legacy code for generating new addresses
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_KEY_NEW_ADDRESS object:nil userInfo:nil];
+}
+
 - (void)reloadSideMenu
 {
     [sideMenuViewController reloadTableView];
@@ -523,7 +538,7 @@ void (^secondPasswordSuccess)(NSString *);
     
     _transactionsViewController.data = response;
     
-    [self reload];
+    [self reloadAfterMultiAddressResponse];
 }
 
 - (void)didSetLatestBlock:(LatestBlock*)block
