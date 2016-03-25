@@ -193,6 +193,8 @@ BOOL displayingLocalSymbolSend;
     } else {
         [self reloadFromAndToFields];
     }
+    
+    
 }
 
 - (BOOL)needsReload

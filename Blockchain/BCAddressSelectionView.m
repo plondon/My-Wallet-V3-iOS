@@ -42,81 +42,7 @@ int legacyAddressesSectionNumber;
         // The To Address View shows address book entries, account and legacy addresses without a balance.
         showFromAddresses = _showFromAddresses;
         
-        addressBookAddresses = [NSMutableArray array];
-        addressBookAddressLabels = [NSMutableArray array];
-        
-        accounts = [NSMutableArray array];
-        accountLabels = [NSMutableArray array];
-        
-        legacyAddresses = [NSMutableArray array];
-        legacyAddressLabels = [NSMutableArray array];
-        
-        // Select from address
-        if (_showFromAddresses) {
-            // First show the HD accounts with positive balance
-            for (int i = 0; i < app.wallet.getActiveAccountsCount; i++) {
-                if ([app.wallet getBalanceForAccount:[app.wallet getIndexOfActiveAccount:i]] > 0) {
-                    [accounts addObject:[NSNumber numberWithInt:i]];
-                    [accountLabels addObject:[_wallet getLabelForAccount:[app.wallet getIndexOfActiveAccount:i]]];
-                }
-            }
-            
-            // Then show the HD accounts with a zero balance
-            for (int i = 0; i < app.wallet.getActiveAccountsCount; i++) {
-                if (![app.wallet getBalanceForAccount:[app.wallet getIndexOfActiveAccount:i]] > 0) {
-                    [accounts addObject:[NSNumber numberWithInt:i]];
-                    [accountLabels addObject:[_wallet getLabelForAccount:[app.wallet getIndexOfActiveAccount:i]]];
-                }
-            }
-            
-            // Then show user's active legacy addresses with a positive balance
-            for (NSString * addr in _wallet.activeLegacyAddresses) {
-                if ([_wallet getLegacyAddressBalance:addr] > 0) {
-                    [legacyAddresses addObject:addr];
-                    [legacyAddressLabels addObject:[_wallet labelForLegacyAddress:addr]];
-                }
-            }
-            
-            // Then show the active legacy addresses with a zero balance
-            for (NSString * addr in _wallet.activeLegacyAddresses) {
-                if (![_wallet getLegacyAddressBalance:addr] > 0) {
-                    [legacyAddresses addObject:addr];
-                    [legacyAddressLabels addObject:[_wallet labelForLegacyAddress:addr]];
-                }
-            }
-            
-            addressBookSectionNumber = -1;
-            accountsSectionNumber = 0;
-            legacyAddressesSectionNumber = (legacyAddresses.count > 0) ? 1 : -1;
-        }
-        // Select to address
-        else {
-            // Show the address book
-            for (NSString * addr in [_wallet.addressBook allKeys]) {
-                [addressBookAddresses addObject:addr];
-                [addressBookAddressLabels addObject:[app.sendViewController labelForLegacyAddress:addr]];
-            }
-            
-            // Then show the HD accounts
-            for (int i = 0; i < app.wallet.getActiveAccountsCount; i++) {
-                [accounts addObject:[NSNumber numberWithInt:i]];
-                [accountLabels addObject:[_wallet getLabelForAccount:[app.wallet getIndexOfActiveAccount:i]]];
-            }
-            
-            // Finally show all the user's active legacy addresses
-            for (NSString * addr in _wallet.activeLegacyAddresses) {
-                [legacyAddresses addObject:addr];
-                [legacyAddressLabels addObject:[_wallet labelForLegacyAddress:addr]];
-            }
-            
-            accountsSectionNumber = 0;
-            legacyAddressesSectionNumber = (legacyAddresses.count > 0) ? accountsSectionNumber + 1 : -1;
-            if (addressBookAddresses.count > 0) {
-                addressBookSectionNumber = (legacyAddressesSectionNumber > 0) ? legacyAddressesSectionNumber + 1 : accountsSectionNumber + 1;
-            } else {
-                addressBookSectionNumber = -1;
-            }
-        }
+        [self setupWithWallet:_wallet showOwnAddresses:_showFromAddresses];
         
         [self addSubview:mainView];
         
@@ -140,8 +66,100 @@ int legacyAddressesSectionNumber;
         
         tableView.backgroundColor = [UIColor whiteColor];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reload) name:NOTIFICATION_KEY_RELOAD_TO_DISMISS_VIEWS object:nil];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)reload
+{
+    [self setupWithWallet:wallet showOwnAddresses:showFromAddresses];
+}
+
+- (void)setupWithWallet:(Wallet *)_wallet showOwnAddresses:(BOOL)_showFromAddresses
+{
+    addressBookAddresses = [NSMutableArray array];
+    addressBookAddressLabels = [NSMutableArray array];
+    
+    accounts = [NSMutableArray array];
+    accountLabels = [NSMutableArray array];
+    
+    legacyAddresses = [NSMutableArray array];
+    legacyAddressLabels = [NSMutableArray array];
+    
+    // Select from address
+    if (_showFromAddresses) {
+        // First show the HD accounts with positive balance
+        for (int i = 0; i < app.wallet.getActiveAccountsCount; i++) {
+            if ([app.wallet getBalanceForAccount:[app.wallet getIndexOfActiveAccount:i]] > 0) {
+                [accounts addObject:[NSNumber numberWithInt:i]];
+                [accountLabels addObject:[_wallet getLabelForAccount:[app.wallet getIndexOfActiveAccount:i]]];
+            }
+        }
+        
+        // Then show the HD accounts with a zero balance
+        for (int i = 0; i < app.wallet.getActiveAccountsCount; i++) {
+            if (![app.wallet getBalanceForAccount:[app.wallet getIndexOfActiveAccount:i]] > 0) {
+                [accounts addObject:[NSNumber numberWithInt:i]];
+                [accountLabels addObject:[_wallet getLabelForAccount:[app.wallet getIndexOfActiveAccount:i]]];
+            }
+        }
+        
+        // Then show user's active legacy addresses with a positive balance
+        for (NSString * addr in _wallet.activeLegacyAddresses) {
+            if ([_wallet getLegacyAddressBalance:addr] > 0) {
+                [legacyAddresses addObject:addr];
+                [legacyAddressLabels addObject:[_wallet labelForLegacyAddress:addr]];
+            }
+        }
+        
+        // Then show the active legacy addresses with a zero balance
+        for (NSString * addr in _wallet.activeLegacyAddresses) {
+            if (![_wallet getLegacyAddressBalance:addr] > 0) {
+                [legacyAddresses addObject:addr];
+                [legacyAddressLabels addObject:[_wallet labelForLegacyAddress:addr]];
+            }
+        }
+        
+        addressBookSectionNumber = -1;
+        accountsSectionNumber = 0;
+        legacyAddressesSectionNumber = (legacyAddresses.count > 0) ? 1 : -1;
+    }
+    // Select to address
+    else {
+        // Show the address book
+        for (NSString * addr in [_wallet.addressBook allKeys]) {
+            [addressBookAddresses addObject:addr];
+            [addressBookAddressLabels addObject:[app.sendViewController labelForLegacyAddress:addr]];
+        }
+        
+        // Then show the HD accounts
+        for (int i = 0; i < app.wallet.getActiveAccountsCount; i++) {
+            [accounts addObject:[NSNumber numberWithInt:i]];
+            [accountLabels addObject:[_wallet getLabelForAccount:[app.wallet getIndexOfActiveAccount:i]]];
+        }
+        
+        // Finally show all the user's active legacy addresses
+        for (NSString * addr in _wallet.activeLegacyAddresses) {
+            [legacyAddresses addObject:addr];
+            [legacyAddressLabels addObject:[_wallet labelForLegacyAddress:addr]];
+        }
+        
+        accountsSectionNumber = 0;
+        legacyAddressesSectionNumber = (legacyAddresses.count > 0) ? accountsSectionNumber + 1 : -1;
+        if (addressBookAddresses.count > 0) {
+            addressBookSectionNumber = (legacyAddressesSectionNumber > 0) ? legacyAddressesSectionNumber + 1 : accountsSectionNumber + 1;
+        } else {
+            addressBookSectionNumber = -1;
+        }
+    }
+    
+    [tableView reloadData];
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
