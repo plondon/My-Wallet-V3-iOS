@@ -211,7 +211,11 @@ BOOL displayingLocalSymbolSend;
     }
     
     if (self.sendToAddress) {
-        toChanged = ![app.wallet isBitcoinAddress:self.toAddress];
+        if ([self.toAddress isEqualToString:@""]) {
+            toChanged = NO;
+        } else {
+            toChanged = ![app.wallet isBitcoinAddress:self.toAddress];
+        }
     } else {
         toChanged = ![app.wallet isAccountAvailable:self.toAccount];
     }
