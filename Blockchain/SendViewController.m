@@ -72,8 +72,14 @@ BOOL displayingLocalSymbolSend;
     
     CGFloat statusBarAdjustment = [[UIApplication sharedApplication] statusBarFrame].size.height > DEFAULT_STATUS_BAR_HEIGHT ? DEFAULT_STATUS_BAR_HEIGHT : 0;
     
-    self.view.frame = CGRectMake(0, 0, app.window.frame.size.width,
-                                 app.window.frame.size.height - DEFAULT_HEADER_HEIGHT - DEFAULT_FOOTER_HEIGHT - statusBarAdjustment);
+    CGRect frame = app.window.frame;
+    
+    if (self.isModal) {
+        self.view.frame = CGRectMake(0, 0, frame.size.width, frame.size.height - DEFAULT_HEADER_HEIGHT - statusBarAdjustment);
+        continuePaymentButton.frame = CGRectMake(continuePaymentButton.frame.origin.x, self.view.frame.size.height - continuePaymentButton.frame.size.height, continuePaymentButton.frame.size.width, continuePaymentButton.frame.size.height);
+    } else {
+        self.view.frame = CGRectMake(0, 0, frame.size.width, frame.size.height - DEFAULT_HEADER_HEIGHT - DEFAULT_FOOTER_HEIGHT - statusBarAdjustment);
+    }
     
     sendProgressModalText.text = nil;
     
@@ -81,6 +87,7 @@ BOOL displayingLocalSymbolSend;
         
         sendProgressModalText.text = [notification object];
     }];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(closeModal) name:NOTIFICATION_KEY_MODAL_VIEW_DISMISSED object:nil];
     
     app.mainTitleLabel.text = BC_STRING_SEND;
 }
@@ -89,6 +96,7 @@ BOOL displayingLocalSymbolSend;
 {
     [super viewDidDisappear:animated];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_KEY_LOADING_TEXT object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_KEY_MODAL_VIEW_DISMISSED object:nil];
 }
 
 - (void)viewDidLoad
@@ -361,7 +369,7 @@ BOOL displayingLocalSymbolSend;
     
     sendProgressModalText.text = BC_STRING_SENDING_TRANSACTION;
     
-    [app showModalWithContent:sendProgressModal closeType:ModalCloseTypeNone headerText:BC_STRING_SENDING_TRANSACTION];
+    [self showModalWithContent:sendProgressModal closeType:ModalCloseTypeNone headerText:BC_STRING_SENDING_TRANSACTION];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(ANIMATION_DURATION * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         
@@ -520,7 +528,7 @@ BOOL displayingLocalSymbolSend;
             strongSelf->sendProgressModalText.text = [NSString stringWithFormat:BC_STRING_TRANSFER_ALL_FROM_ADDRESS_ARGUMENT_ARGUMENT, weakSelf.transferAllPaymentBuilder.transferAllAddressesInitialCount - [weakSelf.transferAllPaymentBuilder.transferAllAddressesToTransfer count] + 1, weakSelf.transferAllPaymentBuilder.transferAllAddressesInitialCount];
         }
         
-        [app showModalWithContent:strongSelf->sendProgressModal closeType:ModalCloseTypeNone headerText:BC_STRING_SENDING_TRANSACTION];
+        [weakSelf showModalWithContent:strongSelf->sendProgressModal closeType:ModalCloseTypeNone headerText:BC_STRING_SENDING_TRANSACTION];
         
         [UIView animateWithDuration:0.3f animations:^{
             UIButton *cancelButton = strongSelf->sendProgressCancelButton;
@@ -680,7 +688,7 @@ BOOL displayingLocalSymbolSend;
     // Timeout so the keyboard is fully dismised - otherwise the second password modal keyboard shows the send screen kebyoard accessory
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         
-        [app showModalWithContent:self.confirmPaymentView closeType:ModalCloseTypeBack headerText:BC_STRING_CONFIRM_PAYMENT onDismiss:^{
+        [self showModalWithContent:self.confirmPaymentView closeType:ModalCloseTypeBack headerText:BC_STRING_CONFIRM_PAYMENT onDismiss:^{
             [self enablePaymentButtons];
         } onResume:nil];
         
@@ -1184,6 +1192,35 @@ BOOL displayingLocalSymbolSend;
     return self.transferAllPaymentBuilder && !self.transferAllPaymentBuilder.userCancelledNext;
 }
 
+- (void)showModalWithContent:(UIView *)contentView closeType:(ModalCloseType)closeType headerText:(NSString *)headerText
+{
+    if (self.isModal) {
+        UIViewController *viewController = [UIViewController new];
+        [viewController.view addSubview:contentView];
+        [self.navigationController pushViewController:viewController animated:YES];
+    } else {
+        [app showModalWithContent:contentView closeType:closeType headerText:headerText];
+    }
+}
+
+- (void)showModalWithContent:(UIView *)contentView closeType:(ModalCloseType)closeType headerText:(NSString *)headerText onDismiss:(void (^)())onDismiss onResume:(void (^)())onResume
+{
+    if (self.isModal) {
+        UIViewController *viewController = [UIViewController new];
+        [viewController.view addSubview:contentView];
+        [self.navigationController pushViewController:viewController animated:YES];
+    } else {
+        [app showModalWithContent:contentView closeType:closeType headerText:headerText onDismiss:onDismiss onResume:onResume];
+    }
+}
+
+- (void)closeModal
+{
+    if (self.isModal) {
+        [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+    }
+}
+
 #pragma mark - Textfield Delegates
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
@@ -1589,7 +1626,7 @@ BOOL displayingLocalSymbolSend;
     BCAddressSelectionView *addressSelectionView = [[BCAddressSelectionView alloc] initWithWallet:app.wallet showOwnAddresses:YES allSelectable:NO accountsOnly:NO];
     addressSelectionView.delegate = self;
     
-    [app showModalWithContent:addressSelectionView closeType:ModalCloseTypeBack showHeader:YES headerText:BC_STRING_SEND_FROM onDismiss:nil onResume:nil];
+    [self showModalWithContent:addressSelectionView closeType:ModalCloseTypeBack headerText:BC_STRING_SEND_FROM];
 }
 
 - (IBAction)addressBookClicked:(id)sender
@@ -1602,7 +1639,7 @@ BOOL displayingLocalSymbolSend;
     BCAddressSelectionView *addressSelectionView = [[BCAddressSelectionView alloc] initWithWallet:app.wallet showOwnAddresses:NO allSelectable:YES accountsOnly:NO];
     addressSelectionView.delegate = self;
     
-    [app showModalWithContent:addressSelectionView closeType:ModalCloseTypeBack showHeader:YES headerText:BC_STRING_SEND_TO onDismiss:nil onResume:nil];
+    [self showModalWithContent:addressSelectionView closeType:ModalCloseTypeBack headerText:BC_STRING_SEND_TO];
 }
 
 - (BOOL)startReadingQRCode
@@ -1634,7 +1671,7 @@ BOOL displayingLocalSymbolSend;
     UIView *view = [[UIView alloc] initWithFrame:frame];
     [view.layer addSublayer:videoPreviewLayer];
     
-    [app showModalWithContent:view closeType:ModalCloseTypeClose headerText:BC_STRING_SCAN_QR_CODE onDismiss:nil onResume:nil];
+    [self showModalWithContent:view closeType:ModalCloseTypeClose headerText:BC_STRING_SCAN_QR_CODE];
     
     [captureSession startRunning];
     

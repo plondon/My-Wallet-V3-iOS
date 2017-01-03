@@ -9,7 +9,7 @@
 #import "BCNavigationController.h"
 
 @interface BCNavigationController ()
-
+@property (nonatomic) BOOL fromMainTab;
 @end
 
 @implementation BCNavigationController
@@ -19,6 +19,16 @@
     if (self = [super initWithRootViewController:rootViewController]) {
         self.headerTitle = headerTitle;
         self.shouldHideBusyView = YES; // default behavior
+    }
+    return self;
+}
+
+- (id)initWithRootViewControllerFromMainTab:(UIViewController *)rootViewController title:(NSString *)headerTitle;
+{
+    if (self = [super initWithRootViewController:rootViewController]) {
+        self.headerTitle = headerTitle;
+        self.shouldHideBusyView = YES;
+        self.fromMainTab = YES;
     }
     return self;
 }
@@ -63,6 +73,17 @@
     [self.topBar addSubview:self.backButton];
     
     [self setupBusyView];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    if (self.fromMainTab) {
+        for (UIView *view in self.topViewController.view.subviews) {
+            view.frame = CGRectOffset(view.frame, 0, DEFAULT_HEADER_HEIGHT);
+        }
+    }
 }
 
 - (void)setupBusyView

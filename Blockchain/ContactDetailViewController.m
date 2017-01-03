@@ -11,6 +11,7 @@
 #import "BCNavigationController.h"
 #import "BCQRCodeView.h"
 #import "Blockchain-Swift.h"
+#import "SendViewController.h"
 
 const int sectionMain = 0;
 const int rowName = 0;
@@ -269,7 +270,11 @@ const int rowDelete = 0;
 
 - (void)sendClicked
 {
-    
+    SendViewController *sendController = [[SendViewController alloc] initWithNibName:NIB_NAME_SEND_COINS bundle:[NSBundle mainBundle]];
+    app.sendViewController = sendController;
+    sendController.isModal = YES;
+    BCNavigationController *navigationController = [[BCNavigationController alloc] initWithRootViewControllerFromMainTab:sendController title:BC_STRING_SEND];
+    [self presentViewController:navigationController animated:YES completion:nil];
 }
 
 - (void)requestClicked

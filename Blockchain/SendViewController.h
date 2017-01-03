@@ -82,6 +82,7 @@
 @property BOOL sendFromAddress;
 @property BOOL sendToAddress;
 @property BOOL surgeIsOccurring;
+@property BOOL isModal;
 
 @property (nonatomic) BOOL isSending;
 

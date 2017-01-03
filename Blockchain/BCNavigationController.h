@@ -23,6 +23,7 @@
 @property (nonatomic) BOOL shouldHideBusyView;
 
 - (id)initWithRootViewController:(UIViewController *)rootViewController title:(NSString *)title;
+- (id)initWithRootViewControllerFromMainTab:(UIViewController *)rootViewController title:(NSString *)headerTitle;
 - (void)showBusyViewWithLoadingText:(NSString *)text;
 - (void)hideBusyView;
 
