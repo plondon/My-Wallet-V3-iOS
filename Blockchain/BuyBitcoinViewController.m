@@ -36,8 +36,9 @@
     self.webView = [[WKWebView alloc] initWithFrame:self.view.frame];
     self.webView.navigationDelegate = self;
     self.view = self.webView;
-    
-    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:[NSURL URLWithString:@"http://10.0.0.175:8080/wallet/#/login"]];
+
+    NSURL *login = [NSURL URLWithString:@"http://localhost:8080/wallet/#/login"];
+    NSURLRequest *request = [NSURLRequest requestWithURL:login];
     [self.webView loadRequest:request];
 }
 
@@ -48,10 +49,11 @@
 
 - (void)login
 {
-    NSString *function = [NSString stringWithFormat:@"activateMobileBuy(\"%@\", \"%@\", \"%@\")", [self.guid escapeStringForJS], [self.sharedKey escapeStringForJS], [self.password escapeStringForJS]];
-    [self.webView evaluateJavaScript:function completionHandler:^(id _Nullable result, NSError * _Nullable error) {
-        DLog(@"completionhandler");
-    }];
+    NSString *script = [NSString stringWithFormat:@"activateMobileBuy('%@', '%@', '%@')",
+                        [self.guid escapeStringForJS],
+                        [self.sharedKey escapeStringForJS],
+                        [self.password escapeStringForJS]];
+    [self.webView evaluateJavaScript:script completionHandler:nil];
 }
 
 @end
