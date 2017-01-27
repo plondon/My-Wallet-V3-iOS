@@ -199,6 +199,7 @@
 - (IBAction)securityCenterClicked:(id)sender;
 - (IBAction)supportClicked:(id)sender;
 - (IBAction)logoutClicked:(id)sender;
+- (IBAction)buyBitcoinClicked:(id)sender;
 
 - (void)setupTransferAllFunds;
 

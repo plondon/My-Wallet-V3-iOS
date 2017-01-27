@@ -512,6 +512,7 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 #define MENU_CELL_INDEX_MERCHANT 3
 #define MENU_CELL_INDEX_SUPPORT 4
 #define MENU_CELL_INDEX_LOGOUT 5
+#define MENU_CELL_INDEX_BUY_BITCOIN 6
 
 #define PIN_API_STATUS_CODE_DELETED 1
 #define PIN_API_STATUS_PIN_INCORRECT 2

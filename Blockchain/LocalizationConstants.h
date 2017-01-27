@@ -166,6 +166,7 @@
 #define BC_STRING_SECURITY_CENTER NSLocalizedString(@"Security Center", nil)
 #define BC_STRING_ADD_EMAIL NSLocalizedString(@"Add Email", nil)
 #define BC_STRING_LOGOUT NSLocalizedString(@"Logout", nil)
+#define BC_STRING_BUY_BITCOIN NSLocalizedString(@"Buy Bitcoin", nil)
 #define BC_STRING_REALLY_LOGOUT NSLocalizedString(@"Do you really want to log out?", nil)
 
 #define BC_STRING_WARNING NSLocalizedString(@"Warning!!!", nil)

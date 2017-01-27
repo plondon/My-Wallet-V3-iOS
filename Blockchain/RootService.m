@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "BuyBitcoinViewController.h"
 #import "SessionManager.h"
 #import "AppDelegate.h"
 #import "MultiAddressResponse.h"
@@ -1473,6 +1474,13 @@ void (^secondPasswordSuccess)(NSString *);
     [self reload];
     
     [self.wallet.webSocket closeWithCode:WEBSOCKET_CODE_LOGGED_OUT reason:WEBSOCKET_CLOSE_REASON_LOGGED_OUT];
+}
+
+- (void)buyBitcoinClicked:(id)sender
+{
+    BuyBitcoinViewController *viewController = [[BuyBitcoinViewController alloc] initWithGuid:self.wallet.guid sharedKey:self.wallet.sharedKey password:self.wallet.password];
+    BCNavigationController *navigationController = [[BCNavigationController alloc] initWithRootViewController:viewController title:BC_STRING_BUY_BITCOIN];
+    [_tabViewController presentViewController:navigationController animated:YES completion:nil];
 }
 
 - (void)forgetWallet
