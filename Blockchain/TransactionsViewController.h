@@ -57,5 +57,5 @@
 - (void)hideFilterLabel;
 - (void)showFilterLabel;
 - (void)changeFilterLabel:(NSString *)newText;
-
+- (void)showTransactionDetail:(Transaction *)transaction;
 @end

@@ -41,6 +41,10 @@
 
 @class Wallet, Transaction, JSValue, JSContext;
 
+@protocol TradeWatcherDelegate
+- (void)watchTrades;
+@end
+
 @protocol WalletDelegate <NSObject>
 @optional
 - (void)didSetLatestBlock:(LatestBlock*)block;
@@ -103,7 +107,7 @@
 - (void)setupBackupTransferAll:(id)transferAllController;
 @end
 
-@interface Wallet : NSObject <UIWebViewDelegate, SRWebSocketDelegate> {
+@interface Wallet : NSObject <UIWebViewDelegate, SRWebSocketDelegate, TradeWatcherDelegate> {
 }
 
 // Core Wallet Init Properties
@@ -147,6 +151,7 @@
 @property (nonatomic) SRWebSocket *webSocket;
 @property (nonatomic) NSTimer *webSocketTimer;
 @property (nonatomic) NSString *swipeAddressToSubscribe;
+@property (nonatomic) NSArray *pendingTrades;
 
 @property (nonatomic) int lastLabelledAddressesCount;
 

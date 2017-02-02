@@ -7,7 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Wallet.h"
 
 @interface BuyBitcoinViewController : UIViewController
+@property (nonatomic) id<TradeWatcherDelegate>delegate;
 - (id)initWithGuid:(NSString *)guid sharedKey:(NSString *)sharedKey password:(NSString *)password;
 @end

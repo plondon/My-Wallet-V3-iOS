@@ -882,6 +882,15 @@
     }
 }
 
+# pragma mark - Trade Watcher Delegate
+
+- (void)watchTrades
+{
+    NSArray *pendingTrades = [[app.wallet executeJSSynchronous:@"Blockchain.MyWallet.wallet.external.sfox.trades.filter(function(trade){return trade._txHash == undefined});"] toArray];
+    
+    self.pendingTrades = [[NSMutableArray alloc] initWithArray:pendingTrades];
+}
+
 # pragma mark - Calls from Obj-C to JS
 
 - (BOOL)isInitialized

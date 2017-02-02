@@ -12,6 +12,7 @@
 #import "MultiAddressResponse.h"
 #import "RootService.h"
 #import "TransactionDetailViewController.h"
+#import "TransactionDetailNavigationController.h"
 
 @implementation TransactionsViewController
 
@@ -304,7 +305,58 @@ int lastNumberTransactions = INT_MAX;
                              [transaction.txType isEqualToString:TX_TYPE_RECEIVED] &&
                              ![app.wallet isRecoveryPhraseVerified]);
     
-    [app paymentReceived:[self getAmountForReceivedTransaction:transaction] showBackupReminder:shouldShowBackupReminder];
+    NSArray *pendingTrades = app.wallet.pendingTrades;
+    if (pendingTrades) {
+        for (NSDictionary *trade in pendingTrades) {
+            NSString *address = [trade objectForKey:DICTIONARY_KEY_TRADE_RECEIVE_ADDRESS];
+            NSArray *recipients = transaction.to;
+            for (NSDictionary *recipient in recipients) {
+                if ([[recipient objectForKey:DICTIONARY_KEY_ADDRESS] isEqualToString:address]) {
+                    [self tradeCompleted:transaction];
+                    break;
+                }
+            }
+        }
+    } else {
+        [app paymentReceived:[self getAmountForReceivedTransaction:transaction] showBackupReminder:shouldShowBackupReminder];
+    }
+}
+
+- (void)tradeCompleted:(Transaction *)transaction
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:BC_STRING_TRADE_COMPLETED message:nil preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_OK style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_VIEW_DETAILS style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self showTransactionDetail:transaction];
+    }]];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (app.topViewControllerDelegate) {
+            [app.topViewControllerDelegate presentViewController:alert animated:YES completion:nil];
+        } else {
+            [app.tabViewController presentViewController:alert animated:YES completion:nil];
+        }
+    });
+}
+
+- (void)showTransactionDetail:(Transaction *)transaction
+{
+    TransactionDetailViewController *detailViewController = [TransactionDetailViewController new];
+    detailViewController.transaction = transaction;
+    
+    TransactionDetailNavigationController *navigationController = [[TransactionDetailNavigationController alloc] initWithRootViewController:detailViewController];
+    
+    detailViewController.busyViewDelegate = navigationController;
+    navigationController.onDismiss = ^() {
+        app.transactionsViewController.detailViewController = nil;
+    };
+    navigationController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
+    app.transactionsViewController.detailViewController = detailViewController;
+    
+    if (app.topViewControllerDelegate) {
+        [app.topViewControllerDelegate presentViewController:navigationController animated:YES completion:nil];
+    } else {
+        [app.tabViewController presentViewController:navigationController animated:YES completion:nil];
+    }
 }
 
 - (void)changeFilterLabel:(NSString *)newText

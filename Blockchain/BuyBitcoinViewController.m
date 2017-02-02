@@ -9,7 +9,7 @@
 #import "BuyBitcoinViewController.h"
 #import <WebKit/WebKit.h>
 #import "NSString+NSString_EscapeQuotes.h"
-
+#import "RootService.h"
 
 @interface BuyBitcoinViewController () <WKNavigationDelegate>
 @property (nonatomic) WKWebView *webView;
@@ -39,21 +39,22 @@
 
     NSURL *login = [NSURL URLWithString:@"http://localhost:8080/wallet/#/login"];
     NSURLRequest *request = [NSURLRequest requestWithURL:login];
+    
     [self.webView loadRequest:request];
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
-    [self performSelector:@selector(login) withObject:nil afterDelay:2];
+    [self performSelector:@selector(login) withObject:nil afterDelay:3];
 }
 
 - (void)login
 {
-    NSString *script = [NSString stringWithFormat:@"activateMobileBuy('%@', '%@', '%@')",
-                        [self.guid escapeStringForJS],
-                        [self.sharedKey escapeStringForJS],
-                        [self.password escapeStringForJS]];
-    [self.webView evaluateJavaScript:script completionHandler:nil];
+    NSString *function = [NSString stringWithFormat:@"activateMobileBuy(\"%@\", \"%@\", \"%@\")", [self.guid escapeStringForJS], [self.sharedKey escapeStringForJS], [self.password escapeStringForJS]];
+    [self.webView evaluateJavaScript:function completionHandler:^(id _Nullable result, NSError * _Nullable error) {
+        DLog(@"result %@, error %@", result, error);
+        [self.delegate watchTrades];
+    }];
 }
 
 @end

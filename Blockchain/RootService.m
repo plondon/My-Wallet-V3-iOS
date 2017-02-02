@@ -1479,6 +1479,7 @@ void (^secondPasswordSuccess)(NSString *);
 - (void)buyBitcoinClicked:(id)sender
 {
     BuyBitcoinViewController *viewController = [[BuyBitcoinViewController alloc] initWithGuid:self.wallet.guid sharedKey:self.wallet.sharedKey password:self.wallet.password];
+    viewController.delegate = app.wallet;
     BCNavigationController *navigationController = [[BCNavigationController alloc] initWithRootViewController:viewController title:BC_STRING_BUY_BITCOIN];
     [_tabViewController presentViewController:navigationController animated:YES completion:nil];
 }
