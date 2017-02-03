@@ -1378,8 +1378,8 @@ BIP39.mnemonicToSeed = function(mnemonic, enteredPassword) {
     return new Buffer(retVal, 'hex');
 }
 
-Metadata.verify = function (address, signature, message) {
-    return objc_message_verify(address, signature.toString('hex'), message);
+Metadata.sign = function (keyPair, message) {
+    return new Buffer(objc_message_sign(keyPair, message), 'hex');
 }
 
 // TODO what should this value be?
@@ -1893,33 +1893,49 @@ MyWalletPhone.precisionToSatoshiBN = function (x, conversion) {
 MyWalletPhone.getPendingTrades = function() {
     console.log('Getting pending trades');
     
+    var sfox = MyWallet.wallet.external.sfox;
+    var coinify = MyWallet.wallet.external.coinify;
+    
     var sfoxAccountFound = false;
     var coinifyAccountFound = false;
     
-    MyWallet.wallet.external.sfox.api.production = true;
+    sfox.api.production = true;
     
-    if (MyWallet.wallet.external.sfox.user) {
+    if (sfox.user) {
         console.log('Found sfox user');
-        console.log(MyWallet.wallet.external.sfox.user);
+        console.log(sfox.user);
         sfoxAccountFound = true;
     }
-    if (MyWallet.wallet.external.coinify.user) {
+    if (coinify.user) {
         console.log('Found coinify user');
-        console.log(MyWallet.wallet.external.coinify.user);
+        console.log(coinify.user);
         coinifyAccountFound = true;
     }
     if (!sfoxAccountFound && !coinifyAccountFound) return;
-    
-    MyWallet.wallet.external.sfox.api.apiKey = 'f31614a7-5074-49f2-8c2a-bfb8e55de2bd';
-    MyWallet.wallet.external.sfox.getTrades().then(MyWalletPhone.filterTrades).catch(function(e){console.log('error getting pending trades');console.log(e);});
+
+    sfox.api.apiKey = 'f31614a7-5074-49f2-8c2a-bfb8e55de2bd';
+    sfox.getTrades().then(function () {
+        sfox.monitorPayments();
+        sfox.trades.filter(function(trade){return !trade.txHash}).forEach(function (trade) {
+            console.log('watching');console.log(trade.receiveAddress);
+            trade.watchAddress().then(function () {
+                                      
+                var tradeObj = {
+                   createdAt: trade.createdAt,
+                   receiveAddress: trade.receiveAddress,
+                   txHash: trade.txHash
+                }
+
+                objc_show_completed_trade(tradeObj);
+            });
+        });
+    });
 }
 
-MyWalletPhone.filterTrades = function(trades) {
-    var filteredTrades = trades.filter(function(trade){return trade._txHash == undefined});
-    var pendingTrades = filteredTrades.map(function(trade){ return {
-         createdAt: trade.createdAt,
-         receiveAddress: trade.receiveAddress,
-        }
-    });
-    objc_on_get_pending_trades(pendingTrades);
+MyWalletPhone.getNetworks = function() {
+    return Networks;
+}
+
+MyWalletPhone.getECDSA = function() {
+    return ECDSA;
 }

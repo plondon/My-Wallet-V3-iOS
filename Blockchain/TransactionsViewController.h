@@ -57,5 +57,6 @@
 - (void)hideFilterLabel;
 - (void)showFilterLabel;
 - (void)changeFilterLabel:(NSString *)newText;
+- (void)showTransactionDetailForHash:(NSString *)hash;
 - (void)showTransactionDetail:(Transaction *)transaction;
 @end

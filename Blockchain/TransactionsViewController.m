@@ -305,44 +305,17 @@ int lastNumberTransactions = INT_MAX;
                              [transaction.txType isEqualToString:TX_TYPE_RECEIVED] &&
                              ![app.wallet isRecoveryPhraseVerified]);
     
-    NSArray *pendingTrades = app.wallet.pendingTrades;
-    if (pendingTrades) {
-        for (NSDictionary *trade in pendingTrades) {
-            NSString *address = [trade objectForKey:DICTIONARY_KEY_TRADE_RECEIVE_ADDRESS];
-            NSArray *recipients = transaction.to;
-            for (NSDictionary *recipient in recipients) {
-                if ([[recipient objectForKey:DICTIONARY_KEY_ADDRESS] isEqualToString:address]) {
-                    [app.wallet watchPendingTrades];
-                    [self tradeCompleted:trade transaction:transaction showBackupReminder:shouldShowBackupReminder];
-                    break;
-                }
-            }
-        }
-    } else {
-        [app paymentReceived:[self getAmountForReceivedTransaction:transaction] showBackupReminder:shouldShowBackupReminder];
-    }
+    [app paymentReceived:[self getAmountForReceivedTransaction:transaction] showBackupReminder:shouldShowBackupReminder];
 }
 
-- (void)tradeCompleted:(NSDictionary *)trade transaction:(Transaction *)transaction showBackupReminder:(BOOL)showBackupReminder
+- (void)showTransactionDetailForHash:(NSString *)hash
 {
-    NSString *date = [transaction getDate];
-    
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:BC_STRING_TRADE_COMPLETED message:[NSString stringWithFormat:BC_STRING_THE_TRADE_YOU_CREATED_ON_DATE_ARGUMENT_HAS_BEEN_COMPLETED, date] preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_OK style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        if (showBackupReminder) {
-            [app showBackupReminder:YES];
+    for (Transaction *transaction in data.transactions) {
+        if ([transaction.myHash isEqualToString:hash]) {
+            [self showTransactionDetail:transaction];
+            break;
         }
-    }]];
-    [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_VIEW_DETAILS style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [self showTransactionDetail:transaction];
-    }]];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (app.topViewControllerDelegate) {
-            [app.topViewControllerDelegate presentViewController:alert animated:YES completion:nil];
-        } else {
-            [app.tabViewController presentViewController:alert animated:YES completion:nil];
-        }
-    });
+    }
 }
 
 - (void)showTransactionDetail:(Transaction *)transaction

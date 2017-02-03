@@ -69,8 +69,7 @@
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
 {
     DLog(@"Received script message");
-    NSArray *trades = message.body;
-    [self.delegate watchTrades:trades];
+    [self.delegate watchPendingTrades];
 }
 
 @end

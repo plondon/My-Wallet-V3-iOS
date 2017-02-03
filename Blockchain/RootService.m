@@ -1466,7 +1466,6 @@ void (^secondPasswordSuccess)(NSString *);
     self.wallet.hasLoadedAccountInfo = NO;
     
     self.latestResponse = nil;
-    self.wallet.pendingTrades = nil;
     
     _transactionsViewController.data = nil;
     _settingsNavigationController = nil;
@@ -1842,6 +1841,26 @@ void (^secondPasswordSuccess)(NSString *);
 - (void)didChangeLocalCurrency
 {
     [self.receiveViewController doCurrencyConversion];
+}
+
+- (void)didCompleteTrade:(NSDictionary *)trade
+{
+    NSString *date = [trade objectForKey:DICTIONARY_KEY_TRADE_DATE_CREATED];
+    NSString *hash = [trade objectForKey:DICTIONARY_KEY_TRADE_HASH];
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:BC_STRING_TRADE_COMPLETED message:[NSString stringWithFormat:BC_STRING_THE_TRADE_YOU_CREATED_ON_DATE_ARGUMENT_HAS_BEEN_COMPLETED, date] preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_OK style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_VIEW_DETAILS style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [_transactionsViewController showTransactionDetailForHash:hash];
+    }]];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (app.topViewControllerDelegate) {
+            [app.topViewControllerDelegate presentViewController:alert animated:YES completion:nil];
+        } else {
+            [app.tabViewController presentViewController:alert animated:YES completion:nil];
+        }
+    });
 }
 
 #pragma mark - Show Screens

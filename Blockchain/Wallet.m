@@ -149,6 +149,22 @@
     
 #pragma mark Decryption
     
+    self.context[@"objc_message_sign"] = ^(KeyPair *keyPair, NSString *message, JSValue *network) {
+        return [[keyPair.key signatureForMessage:message] hexadecimalString];
+    };
+    
+    self.context[@"objc_get_shared_key"] = ^(KeyPair *publicKey, KeyPair *privateKey) {
+        return [BTCSHA256([[publicKey.key diffieHellmanWithPrivateKey:privateKey.key] publicKey]) hexadecimalString];
+    };
+    
+    self.context[@"objc_message_verify_base64"] = ^(NSString *address, NSString *signature, NSString *message) {
+        NSData *signatureData = [[NSData alloc] initWithBase64EncodedString:signature options:kNilOptions];
+        NSData *messageData = [message dataUsingEncoding:NSUTF8StringEncoding];
+        BTCKey *key = [BTCKey verifySignature:signatureData forBinaryMessage:messageData];
+        KeyPair *keyPair = [[KeyPair alloc] initWithKey:key network:nil];
+        return [[keyPair getAddress] isEqualToString:address];
+    };
+    
     self.context[@"objc_message_verify"] = ^(NSString *address, NSString *signature, NSString *message) {
         NSData *signatureData = BTCDataFromHex(signature);
         NSData *messageData = [message dataUsingEncoding:NSUTF8StringEncoding];
@@ -567,8 +583,8 @@
     
 #pragma mark Buy
     
-    self.context[@"objc_on_get_pending_trades"] = ^(JSValue *trades) {
-        [weakSelf on_get_pending_trades:trades];
+    self.context[@"objc_show_completed_trade"] = ^(JSValue *trade) {
+        [weakSelf show_completed_trade:trade];
     };
     
 #pragma mark Settings
@@ -886,14 +902,6 @@
         
         [self.webSocket closeWithCode:WEBSOCKET_CODE_RECEIVED_TO_SWIPE_ADDRESS reason:WEBSOCKET_CLOSE_REASON_RECEIVED_TO_SWIPE_ADDRESS];
     }
-}
-
-# pragma mark - Trade Watcher Delegate
-
-- (void)watchTrades:(NSArray *)trades
-{
-    DLog(@"Watching trades %@", trades);
-    self.pendingTrades = [[NSMutableArray alloc] initWithArray:trades];
 }
 
 # pragma mark - Calls from Obj-C to JS
@@ -3034,11 +3042,16 @@
     [self.webSocket closeWithCode:WEBSOCKET_CODE_ARCHIVE_UNARCHIVE reason:WEBSOCKET_CLOSE_REASON_ARCHIVED_UNARCHIVED];
 }
 
-- (void)on_get_pending_trades:(JSValue *)trades
+- (void)show_completed_trade:(JSValue *)trade
 {
-    DLog(@"on_get_pending_trades");
+    NSDictionary *tradeDict = [trade toDictionary];
+    DLog(@"show_completed_trade %@", tradeDict);
     
-    [self watchTrades:[trades toArray]];
+    if ([self.delegate respondsToSelector:@selector(didCompleteTrade:)]) {
+        [self.delegate didCompleteTrade:tradeDict];
+    } else {
+        DLog(@"Error: delegate of class %@ does not respond to selector didCompleteTrade:!", [delegate class]);
+    }
 }
 
 # pragma mark - Calls from Obj-C to JS for HD wallet
