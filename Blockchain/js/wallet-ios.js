@@ -1892,8 +1892,26 @@ MyWalletPhone.precisionToSatoshiBN = function (x, conversion) {
 
 MyWalletPhone.getPendingTrades = function() {
     console.log('Getting pending trades');
+    
+    var sfoxAccountFound = false;
+    var coinifyAccountFound = false;
+    
+    MyWallet.wallet.external.sfox.api.production = true;
+    
+    if (MyWallet.wallet.external.sfox.user) {
+        console.log('Found sfox user');
+        console.log(MyWallet.wallet.external.sfox.user);
+        sfoxAccountFound = true;
+    }
+    if (MyWallet.wallet.external.coinify.user) {
+        console.log('Found coinify user');
+        console.log(MyWallet.wallet.external.coinify.user);
+        coinifyAccountFound = true;
+    }
+    if (!sfoxAccountFound && !coinifyAccountFound) return;
+    
     MyWallet.wallet.external.sfox.api.apiKey = 'f31614a7-5074-49f2-8c2a-bfb8e55de2bd';
-    MyWallet.wallet.external.sfox.fetchProfile().then(getTrades.bind(MyWallet.wallet.external.sfox)).catch(function(e){console.log('error getting pending trades');console.log(e);});
+    MyWallet.wallet.external.sfox.getTrades().then(MyWalletPhone.filterTrades).catch(function(e){console.log('error getting pending trades');console.log(e);});
 }
 
 MyWalletPhone.filterTrades = function(trades) {
