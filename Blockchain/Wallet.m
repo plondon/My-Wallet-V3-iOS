@@ -892,6 +892,7 @@
 
 - (void)watchTrades:(NSArray *)trades
 {
+    DLog(@"Watching trades %@", trades);
     self.pendingTrades = [[NSMutableArray alloc] initWithArray:trades];
 }
 

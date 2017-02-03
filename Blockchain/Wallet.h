@@ -43,6 +43,8 @@
 
 @protocol TradeWatcherDelegate
 - (void)watchTrades:(NSArray *)trades;
+@optional
+- (void)watchPendingTrades;
 @end
 
 @protocol WalletDelegate <NSObject>

@@ -312,6 +312,7 @@ int lastNumberTransactions = INT_MAX;
             NSArray *recipients = transaction.to;
             for (NSDictionary *recipient in recipients) {
                 if ([[recipient objectForKey:DICTIONARY_KEY_ADDRESS] isEqualToString:address]) {
+                    [app.wallet watchPendingTrades];
                     [self tradeCompleted:trade transaction:transaction showBackupReminder:shouldShowBackupReminder];
                     break;
                 }
