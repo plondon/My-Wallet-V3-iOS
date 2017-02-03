@@ -312,7 +312,7 @@ int lastNumberTransactions = INT_MAX;
             NSArray *recipients = transaction.to;
             for (NSDictionary *recipient in recipients) {
                 if ([[recipient objectForKey:DICTIONARY_KEY_ADDRESS] isEqualToString:address]) {
-                    [self tradeCompleted:transaction];
+                    [self tradeCompleted:trade transaction:transaction];
                     break;
                 }
             }
@@ -322,9 +322,11 @@ int lastNumberTransactions = INT_MAX;
     }
 }
 
-- (void)tradeCompleted:(Transaction *)transaction
+- (void)tradeCompleted:(NSDictionary *)trade transaction:(Transaction *)transaction
 {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:BC_STRING_TRADE_COMPLETED message:nil preferredStyle:UIAlertControllerStyleAlert];
+    NSString *date = [transaction getDate];
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:BC_STRING_TRADE_COMPLETED message:[NSString stringWithFormat:BC_STRING_THE_TRADE_YOU_CREATED_ON_DATE_ARGUMENT_HAS_BEEN_COMPLETED, date] preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_OK style:UIAlertActionStyleCancel handler:nil]];
     [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_VIEW_DETAILS style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [self showTransactionDetail:transaction];

@@ -42,7 +42,7 @@
 @class Wallet, Transaction, JSValue, JSContext;
 
 @protocol TradeWatcherDelegate
-- (void)watchTrades;
+- (void)watchTrades:(NSArray *)trades;
 @end
 
 @protocol WalletDelegate <NSObject>

@@ -316,7 +316,8 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 #define CURRENCY_CODE_BRL @"BRL"
 #define CURRENCY_CODE_RUB @"RUB"
 
-#define DICTIONARY_KEY_TRADE_RECEIVE_ADDRESS @"_receiveAddress"
+#define DICTIONARY_KEY_TRADE_DATE_CREATED @"createdAt"
+#define DICTIONARY_KEY_TRADE_RECEIVE_ADDRESS @"receiveAddress"
 
 #define DICTIONARY_KEY_TRANSACTION_FROM @"from"
 #define DICTIONARY_KEY_TRANSACTION_TO @"to"

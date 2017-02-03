@@ -51,6 +51,7 @@
 #define BC_STRING_ERROR_COPYING_TO_CLIPBOARD NSLocalizedString(@"An error occurred while copying your address to the clipboard. Please re-select the destination address or restart the app and try again.", nil)
 
 #define BC_STRING_TRADE_COMPLETED NSLocalizedString(@"Trade Completed", nil)
+#define BC_STRING_THE_TRADE_YOU_CREATED_ON_DATE_ARGUMENT_HAS_BEEN_COMPLETED NSLocalizedString(@"The trade you created on %@ has been completed!", nil)
 #define BC_STRING_VIEW_DETAILS NSLocalizedString(@"View details", nil)
 
 #define BC_STRING_CONFIRM_PAYMENT NSLocalizedString(@"Confirm Payment", nil)

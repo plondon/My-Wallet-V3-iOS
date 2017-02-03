@@ -565,6 +565,12 @@
         [weakSelf on_error_recover_with_passphrase:error];
     };
     
+#pragma mark Buy
+    
+    self.context[@"objc_on_get_pending_trades"] = ^(JSValue *trades) {
+        [weakSelf on_get_pending_trades:trades];
+    };
+    
 #pragma mark Settings
     
     self.context[@"objc_on_get_account_info_success"] = ^(NSString *accountInfo) {
@@ -884,11 +890,9 @@
 
 # pragma mark - Trade Watcher Delegate
 
-- (void)watchTrades
+- (void)watchTrades:(NSArray *)trades
 {
-    NSArray *pendingTrades = [[app.wallet executeJSSynchronous:@"Blockchain.MyWallet.wallet.external.sfox.trades.filter(function(trade){return trade._txHash == undefined});"] toArray];
-    
-    self.pendingTrades = [[NSMutableArray alloc] initWithArray:pendingTrades];
+    self.pendingTrades = [[NSMutableArray alloc] initWithArray:trades];
 }
 
 # pragma mark - Calls from Obj-C to JS
@@ -1906,6 +1910,11 @@
     return [[[self.context evaluateScript:@"MyWalletPhone.getDefaultAccountLabelledAddressesCount()"] toNumber] intValue];
 }
 
+- (void)watchPendingTrades
+{
+    [self.context evaluateScript:@"MyWalletPhone.getPendingTrades()"];
+}
+
 - (JSValue *)executeJSSynchronous:(NSString *)command
 {
     return [self.context evaluateScript:command];
@@ -2349,6 +2358,8 @@
             [self changeLocalCurrency:[[NSLocale currentLocale] objectForKey:NSLocaleCurrencyCode]];
         }
     }
+    
+    [self watchPendingTrades];
         
     if ([delegate respondsToSelector:@selector(walletDidFinishLoad)]) {
         [delegate walletDidFinishLoad];
@@ -3020,6 +3031,13 @@
     DLog(@"did_archive_or_unarchive");
     
     [self.webSocket closeWithCode:WEBSOCKET_CODE_ARCHIVE_UNARCHIVE reason:WEBSOCKET_CLOSE_REASON_ARCHIVED_UNARCHIVED];
+}
+
+- (void)on_get_pending_trades:(JSValue *)trades
+{
+    DLog(@"on_get_pending_trades");
+    
+    [self watchTrades:[trades toArray]];
 }
 
 # pragma mark - Calls from Obj-C to JS for HD wallet

@@ -1889,3 +1889,19 @@ function sShift (conversion) {
 MyWalletPhone.precisionToSatoshiBN = function (x, conversion) {
     return MyWalletPhone.parseValueBitcoin(x).divide(BigInteger.valueOf(Math.pow(10, sShift(conversion).toString())));
 }
+
+MyWalletPhone.getPendingTrades = function() {
+    console.log('Getting pending trades');
+    MyWallet.wallet.external.sfox.api.apiKey = 'f31614a7-5074-49f2-8c2a-bfb8e55de2bd';
+    MyWallet.wallet.external.sfox.fetchProfile().then(getTrades.bind(MyWallet.wallet.external.sfox)).catch(function(e){console.log('error getting pending trades');console.log(e);});
+}
+
+MyWalletPhone.filterTrades = function(trades) {
+    var filteredTrades = trades.filter(function(trade){return trade._txHash == undefined});
+    var pendingTrades = filteredTrades.map(function(trade){ return {
+         createdAt: trade.createdAt,
+         receiveAddress: trade.receiveAddress,
+        }
+    });
+    objc_on_get_pending_trades(pendingTrades);
+}
