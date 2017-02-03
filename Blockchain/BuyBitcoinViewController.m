@@ -41,9 +41,11 @@
     
     configuration.userContentController = userController;
     
-    self.webView = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
+    self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, DEFAULT_HEADER_HEIGHT, self.view.frame.size.width, self.view.frame.size.height - DEFAULT_HEADER_HEIGHT) configuration:configuration];
+    [self.view addSubview:self.webView];
+
     self.webView.navigationDelegate = self;
-    self.view = self.webView;
+    self.automaticallyAdjustsScrollViewInsets = NO;
 
     NSURL *login = [NSURL URLWithString:@"http://localhost:8080/wallet/#/intermediate"];
     NSURLRequest *request = [NSURLRequest requestWithURL:login];
