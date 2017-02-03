@@ -1466,6 +1466,7 @@ void (^secondPasswordSuccess)(NSString *);
     self.wallet.hasLoadedAccountInfo = NO;
     
     self.latestResponse = nil;
+    self.wallet.pendingTrades = nil;
     
     _transactionsViewController.data = nil;
     _settingsNavigationController = nil;
