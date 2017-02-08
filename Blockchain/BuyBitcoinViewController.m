@@ -48,8 +48,7 @@
     self.automaticallyAdjustsScrollViewInsets = NO;
 
     NSURL *login = [NSURL URLWithString:@"http://localhost:8080/wallet/#/intermediate"];
-    NSURLRequest *request = [NSURLRequest requestWithURL:login];
-    
+    NSURLRequest *request = [NSURLRequest requestWithURL:login cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval: 10.0];
     [self.webView loadRequest:request];
 }
 
