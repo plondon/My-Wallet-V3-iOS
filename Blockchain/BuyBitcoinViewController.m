@@ -17,6 +17,7 @@
 @property (nonatomic) NSString *guid;
 @property (nonatomic) NSString *sharedKey;
 @property (nonatomic) NSString *password;
+@property (nonatomic) BOOL didInitiateTrade;
 @end
 
 @implementation BuyBitcoinViewController
@@ -68,7 +69,14 @@
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
 {
     DLog(@"Received script message");
-    [self.delegate watchPendingTrades];
+    self.didInitiateTrade = YES;
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    if (self.didInitiateTrade) {
+        [self.delegate watchPendingTrades];
+    }
 }
 
 @end
