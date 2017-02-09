@@ -195,6 +195,8 @@ void (^secondPasswordSuccess)(NSString *);
     
     [self showWelcomeOrPinScreen];
     
+    [self setupBuyWebView];
+    
     return YES;
 }
 
@@ -492,6 +494,11 @@ void (^secondPasswordSuccess)(NSString *);
     
     curtainImageView.image = launchImage;
     curtainImageView.alpha = 0;
+}
+
+- (void)setupBuyWebView
+{
+    self.buyBitcoinViewController = [[BuyBitcoinViewController alloc] init];
 }
 
 #pragma mark - UI State
@@ -1478,9 +1485,9 @@ void (^secondPasswordSuccess)(NSString *);
 
 - (void)buyBitcoinClicked:(id)sender
 {
-    BuyBitcoinViewController *viewController = [[BuyBitcoinViewController alloc] initWithGuid:self.wallet.guid sharedKey:self.wallet.sharedKey password:self.wallet.password];
-    viewController.delegate = app.wallet;
-    BCNavigationController *navigationController = [[BCNavigationController alloc] initWithRootViewController:viewController title:BC_STRING_BUY_BITCOIN];
+    [self.buyBitcoinViewController loginWithGuid:self.wallet.guid sharedKey:self.wallet.sharedKey password:self.wallet.password];
+    self.buyBitcoinViewController.delegate = app.wallet;
+    BCNavigationController *navigationController = [[BCNavigationController alloc] initWithRootViewController:self.buyBitcoinViewController title:BC_STRING_BUY_BITCOIN];
     [_tabViewController presentViewController:navigationController animated:YES completion:nil];
 }
 

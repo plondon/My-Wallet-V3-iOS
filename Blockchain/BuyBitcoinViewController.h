@@ -11,5 +11,6 @@
 
 @interface BuyBitcoinViewController : UIViewController
 @property (nonatomic) id<TradeWatcherDelegate>delegate;
-- (id)initWithGuid:(NSString *)guid sharedKey:(NSString *)sharedKey password:(NSString *)password;
+- (id)init;
+- (void)loginWithGuid:(NSString *)guid sharedKey:(NSString *)sharedKey password:(NSString *)password;
 @end
