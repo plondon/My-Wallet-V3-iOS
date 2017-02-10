@@ -106,6 +106,7 @@
 - (void)didChangeLocalCurrency;
 - (void)setupBackupTransferAll:(id)transferAllController;
 - (void)didCompleteTrade:(NSDictionary *)trade;
+- (void)didPushTransaction;
 @end
 
 @interface Wallet : NSObject <UIWebViewDelegate, SRWebSocketDelegate, TradeWatcherDelegate> {
