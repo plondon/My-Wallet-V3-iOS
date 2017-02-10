@@ -410,13 +410,16 @@ int accountEntries = 0;
         }
         NSMutableArray *images;
 
-        images = [NSMutableArray arrayWithArray:@[upgradeOrBackupImage, @"settings_icon", @"icon_wallet", @"icon_merchant", @"icon_support", @"logout_icon"]];
+        images = [NSMutableArray arrayWithArray:@[upgradeOrBackupImage, @"settings_icon", @"icon_wallet", @"icon_merchant", @"icon_support", @"logout_icon", @"icon_buy"]];
         
         cell.textLabel.text = titles[indexPath.row];
         cell.textLabel.adjustsFontSizeToFitWidth = YES;
         cell.imageView.image = [UIImage imageNamed:images[indexPath.row]];
         
         if ([images[indexPath.row] isEqualToString:@"security"]) {
+            cell.imageView.image = [cell.imageView.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+            [cell.imageView setTintColor:COLOR_BLOCKCHAIN_LIGHT_BLUE];
+        } else if ([images[indexPath.row] isEqualToString:@"icon_buy"]) {
             cell.imageView.image = [cell.imageView.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             [cell.imageView setTintColor:COLOR_BLOCKCHAIN_LIGHT_BLUE];
         }

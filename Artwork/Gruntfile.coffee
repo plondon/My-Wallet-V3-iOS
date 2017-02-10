@@ -72,4 +72,5 @@ module.exports = (grunt) ->
     "shell:svg:lock_large:72:55"
     "shell:svg:mobile_large:72:49"
     "shell:svg:close_large:30"
+    "shell:svg:icon_buy:26"
   ]
