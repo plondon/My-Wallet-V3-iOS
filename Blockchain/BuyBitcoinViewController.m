@@ -70,6 +70,10 @@
     if (self.didInitiateTrade) {
         [self.delegate watchPendingTrades];
     }
+    NSString *function = [NSString stringWithFormat:@"Blockchain.MyWallet.logout(true)"];
+    [self.webView evaluateJavaScript:function completionHandler:^(id _Nullable result, NSError * _Nullable error) {
+        DLog(@"Logout result %@, error %@", result, error);
+    }];
 }
 
 @end
