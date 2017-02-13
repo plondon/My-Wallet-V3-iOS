@@ -13,4 +13,5 @@
 @property (nonatomic) id<TradeWatcherDelegate>delegate;
 - (id)init;
 - (void)loginWithGuid:(NSString *)guid sharedKey:(NSString *)sharedKey password:(NSString *)password;
+- (void)loginWithJson:(NSString *)guid password:(NSString *)password;
 @end

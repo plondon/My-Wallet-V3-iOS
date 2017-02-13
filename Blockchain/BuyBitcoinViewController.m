@@ -45,9 +45,17 @@
 
 - (void)loginWithGuid:(NSString *)guid sharedKey:(NSString *)sharedKey password:(NSString *)password
 {
-    NSString *function = [NSString stringWithFormat:@"activateMobileBuy(\"%@\", \"%@\", \"%@\")", [guid escapeStringForJS], [sharedKey escapeStringForJS], [password escapeStringForJS]];
+    NSString *function = [NSString stringWithFormat:@"activateMobileBuy('%@', '%@', '%@')", [guid escapeStringForJS], [sharedKey escapeStringForJS], [password escapeStringForJS]];
     [self.webView evaluateJavaScript:function completionHandler:^(id _Nullable result, NSError * _Nullable error) {
-        DLog(@"Login result %@, error %@", result, error);
+        DLog(@"Login with guid result %@, error %@", result, error);
+    }];
+}
+
+- (void)loginWithJson:(NSString *)json password:(NSString *)password
+{
+    NSString *function = [NSString stringWithFormat:@"activateMobileBuyFromJson('%@', '%@')", [json escapeStringForJS], [password escapeStringForJS]];
+    [self.webView evaluateJavaScript:function completionHandler:^(id _Nullable result, NSError * _Nullable error) {
+        DLog(@"Login with json result %@, error %@", result, error);
     }];
 }
 

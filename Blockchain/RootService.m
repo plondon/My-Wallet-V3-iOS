@@ -44,6 +44,7 @@
 #import "KeychainItemWrapper+SwipeAddresses.h"
 #import "NSString+SHA256.h"
 #import "Blockchain-Swift.h"
+#import <JavaScriptCore/JavaScriptCore.h>
 
 @implementation RootService
 
@@ -1490,7 +1491,8 @@ void (^secondPasswordSuccess)(NSString *);
 
 - (void)buyBitcoinClicked:(id)sender
 {
-    [self.buyBitcoinViewController loginWithGuid:self.wallet.guid sharedKey:self.wallet.sharedKey password:self.wallet.password];
+    NSString *json = [[app.wallet executeJSSynchronous:@"JSON.stringify(MyWallet.wallet.toJSON())"] toString];
+    [self.buyBitcoinViewController loginWithJson:json password:self.wallet.password];
     self.buyBitcoinViewController.delegate = app.wallet;
     BCNavigationController *navigationController = [[BCNavigationController alloc] initWithRootViewController:self.buyBitcoinViewController title:BC_STRING_BUY_BITCOIN];
     [_tabViewController presentViewController:navigationController animated:YES completion:nil];
