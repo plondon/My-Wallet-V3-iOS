@@ -146,6 +146,11 @@ void (^secondPasswordSuccess)(NSString *);
     
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_DEFAULTS_KEY_DEBUG_ENABLE_TESTNET];
     
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_DEFAULTS_KEY_DEBUG_SECURITY_REMINDER_CUSTOM_TIMER];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:USER_DEFAULTS_KEY_DEBUG_APP_REVIEW_PROMPT_CUSTOM_TIMER];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:USER_DEFAULTS_KEY_DEBUG_SIMULATE_ZERO_TICKER];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:USER_DEFAULTS_KEY_DEBUG_SIMULATE_SURGE];
+
     [[NSUserDefaults standardUserDefaults] synchronize];
 #endif
     
@@ -1870,6 +1875,42 @@ void (^secondPasswordSuccess)(NSString *);
     });
 }
 
+- (void)didPushTransaction
+{
+    DestinationAddressSource source = self.sendViewController.addressSource;
+    NSString *eventName;
+    
+    if (source == DestinationAddressSourceQR) {
+        eventName = WALLET_EVENT_TX_FROM_QR;
+    } else if (source == DestinationAddressSourcePaste) {
+        eventName = WALLET_EVENT_TX_FROM_PASTE;
+    } else if (source == DestinationAddressSourceURI) {
+        eventName = WALLET_EVENT_TX_FROM_URI;
+    } else if (source == DestinationAddressSourceDropDown) {
+        eventName = WALLET_EVENT_TX_FROM_DROPDOWN;
+    } else if (source == DestinationAddressSourceNone) {
+        DLog(@"Destination address source none");
+        return;
+    } else {
+        DLog(@"Unknown destination address source %d", source);
+        return;
+    }
+    
+    NSURLSession *session = [SessionManager sharedSession];
+    NSURL *URL = [NSURL URLWithString:[URL_SERVER stringByAppendingFormat:URL_SUFFIX_EVENT_NAME_ARGUMENT, eventName]];
+    
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
+    request.HTTPMethod = @"POST";
+    
+    NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error) {
+            DLog(@"Error saving address input: %@", [error localizedDescription]);
+        }
+    }];
+    
+    [dataTask resume];
+}
+
 #pragma mark - Show Screens
 
 - (void)showAccountsAndAddresses
@@ -1924,9 +1965,9 @@ void (^secondPasswordSuccess)(NSString *);
 
 - (void)showSupport
 {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:BC_STRING_OPEN_ARGUMENT, SUPPORT_URL] message:BC_STRING_LEAVE_APP preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:BC_STRING_OPEN_ARGUMENT, URL_SUPPORT] message:BC_STRING_LEAVE_APP preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_CONTINUE style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:SUPPORT_URL]];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:URL_SUPPORT]];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_CANCEL style:UIAlertActionStyleCancel handler:nil]];
     [self.window.rootViewController presentViewController:alert animated:YES completion:nil];
@@ -2203,10 +2244,10 @@ void (^secondPasswordSuccess)(NSString *);
     }
 }
 
-- (IBAction)securityCenterClicked:(id)sender
+- (IBAction)backupFundsClicked:(id)sender
 {
     if (!_tabViewController.presentedViewController) {
-        [self showSecurityCenter];
+        [self showBackup];
     }
 }
 
@@ -2635,7 +2676,7 @@ void (^secondPasswordSuccess)(NSString *);
     [self.window.rootViewController presentViewController:alert animated:YES completion:nil];
 }
 
-- (void)checkForUnusedAddress:(NSString *)address success:(void (^)())successBlock failure:(void (^)())failureBlock error:(void (^)())errorBlock
+- (void)checkForUnusedAddress:(NSString *)address success:(void (^)(NSString *, BOOL))successBlock error:(void (^)())errorBlock
 {
     NSURL *URL = [NSURL URLWithString:[NSString stringWithFormat:ADDRESS_URL_HASH_ARGUMENT_ADDRESS_ARGUMENT, address]];
     NSURLRequest *request = [NSURLRequest requestWithURL:URL];
@@ -2657,11 +2698,8 @@ void (^secondPasswordSuccess)(NSString *);
         NSArray *transactions = addressInfo[@"txs"];
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (transactions.count > 0) {
-                if (failureBlock) failureBlock();
-            } else {
-                if (successBlock) successBlock();
-            }
+            BOOL isUnused = transactions.count == 0;
+            return successBlock(address, isUnused);
         });
         
     }];
@@ -2706,11 +2744,14 @@ void (^secondPasswordSuccess)(NSString *);
 
 - (void)showBackup
 {
-    void (^showBackupBlock)() = ^() {
-        [self.settingsNavigationController showBackup];
-    };
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:STORYBOARD_NAME_BACKUP bundle: nil];
+    BackupViewController *backupController = [storyboard instantiateViewControllerWithIdentifier:NAVIGATION_CONTROLLER_NAME_BACKUP];
     
-    [self showSettings:showBackupBlock];
+    backupController.wallet = app.wallet;
+    backupController.app = app;
+    
+    backupController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
+    [self.tabViewController presentViewController:backupController animated:YES completion:nil];
 }
 
 - (void)showTwoStep
@@ -3239,7 +3280,7 @@ void (^secondPasswordSuccess)(NSString *);
 
 - (void)failedToValidateCertificate
 {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:BC_STRING_FAILED_VALIDATION_CERTIFICATE_TITLE message:[NSString stringWithFormat:@"%@\n\n%@", BC_STRING_FAILED_VALIDATION_CERTIFICATE_MESSAGE, [NSString stringWithFormat:BC_STRING_FAILED_VALIDATION_CERTIFICATE_MESSAGE_CONTACT_SUPPORT_ARGUMENT, SUPPORT_URL]] preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:BC_STRING_FAILED_VALIDATION_CERTIFICATE_TITLE message:[NSString stringWithFormat:@"%@\n\n%@", BC_STRING_FAILED_VALIDATION_CERTIFICATE_MESSAGE, [NSString stringWithFormat:BC_STRING_FAILED_VALIDATION_CERTIFICATE_MESSAGE_CONTACT_SUPPORT_ARGUMENT, URL_SUPPORT]] preferredStyle:UIAlertControllerStyleAlert];
     alert.view.tag = TAG_CERTIFICATE_VALIDATION_FAILURE_ALERT;
     [alert addAction:[UIAlertAction actionWithTitle:BC_STRING_OK style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         // Close App

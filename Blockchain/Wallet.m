@@ -753,13 +753,7 @@
 {    
     self.swipeAddressToSubscribe = address;
 
-    if (self.webSocket && self.webSocket.readyState == 1) {
-        NSError *error;
-        [self.webSocket sendString:[NSString stringWithFormat:@"{\"op\":\"addr_sub\",\"addr\":\"%@\"}", self.swipeAddressToSubscribe] error:&error];
-        if (error) DLog(@"Error subscribing to swipe address: %@", [error localizedDescription]);
-    } else {
-        [self setupWebSocket];
-    }
+    [self subscribeToAddress:address];
 }
 
 - (void)apiGetPINValue:(NSString*)key pin:(NSString*)pin
@@ -836,7 +830,7 @@
 {
     DLog(@"websocket opened");
     NSString *message = self.swipeAddressToSubscribe ? [NSString stringWithFormat:@"{\"op\":\"addr_sub\",\"addr\":\"%@\"}", self.swipeAddressToSubscribe] : [[self.context evaluateScript:@"MyWallet.getSocketOnOpenMessage()"] toString];
-
+    
     NSError *error;
     [webSocket sendString:message error:&error];
     if (error) DLog(@"Error subscribing to address: %@", [error localizedDescription]);
@@ -1983,6 +1977,12 @@
         if (listener.on_success) {
             listener.on_success(secondPassword);
         }
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(didPushTransaction)]) {
+        [self.delegate didPushTransaction];
+    } else {
+        DLog(@"Error: delegate of class %@ does not respond to selector didPushTransaction!", [delegate class]);
     }
 }
 

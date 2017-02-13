@@ -25,7 +25,7 @@
         WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
         WKUserContentController* userController = [[WKUserContentController alloc] init];
         
-        [userController addScriptMessageHandler:self name:@"buyCompleted"];
+        [userController addScriptMessageHandler:self name:WEBKIT_HANDLER_BUY_COMPLETED];
         
         configuration.userContentController = userController;
         
@@ -35,7 +35,7 @@
         self.webView.navigationDelegate = self;
         self.automaticallyAdjustsScrollViewInsets = NO;
         
-        NSURL *login = [NSURL URLWithString:@"http://localhost:8080/wallet/#/intermediate"];
+        NSURL *login = [NSURL URLWithString:URL_BUY_LOGIN];
         NSURLRequest *request = [NSURLRequest requestWithURL:login cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval: 10.0];
         [self.webView loadRequest:request];
         

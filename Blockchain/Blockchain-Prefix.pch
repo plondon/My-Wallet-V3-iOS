@@ -62,10 +62,6 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 #define COLOR_BACKGROUND_GRAY UIColorFromRGB(0xf7f7f7)
 #define COLOR_FOREGROUND_GRAY UIColorFromRGB(0x6d6d72)
 
-#define COLOR_SECURITY_CENTER_GREEN UIColorFromRGB(0x3CC476)
-#define COLOR_SECURITY_CENTER_YELLOW UIColorFromRGB(0xFCCC65)
-#define COLOR_SECURITY_CENTER_RED UIColorFromRGB(0xE47F7F)
-
 #define COLOR_TEXT_GRAY UIColorFromRGB(0x9B9B9B)
 #define COLOR_TEXT_FIELD_GRAY UIColorFromRGB(0xd1d1d1)
 #define COLOR_TEXT_FIELD_BORDER_GRAY UIColorFromRGB(0xcdcdcd)
@@ -138,6 +134,7 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 #define DEBUG_STRING_CERTIFICATE_PINNING @"Certificate Pinning"
 #define DEBUG_STRING_APP_STORE_REVIEW_PROMPT_TIMER NSLocalizedString(@"App Store review prompt timer (seconds)", nil)
 #define DEBUG_STRING_SECURITY_REMINDER_PROMPT_TIMER NSLocalizedString(@"Security reminder prompt timer (seconds)", nil)
+#define DEBUG_STRING_ZERO_VALUE_TICKER NSLocalizedString(@"Simulate zero ticker values", nil)
 
 #define CERTIFICATE_SERVER_NAME @"blockchain"
 #define CERTIFICATE_FILE_TYPE_DER @"der"
@@ -239,7 +236,6 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 #define SEGUE_SENDER_ABOUT_US @"aboutUs"
 #define SEGUE_SENDER_TERMS_OF_SERVICE @"termsOfService"
 #define SEGUE_SENDER_PRIVACY_POLICY @"privacyPolicy"
-#define SEGUE_IDENTIFIER_SECURITY_CENTER @"securityCenter"
 #define SEGUE_IDENTIFIER_DEBUG_MENU @"debugMenu"
 
 #define HOST_NAME_WALLET_SERVER @"blockchain.info"
@@ -269,7 +265,19 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 
 #define URL_SURVEY @"https://blockchain.co1.qualtrics.com/SE/?SID=SV_8c6uSMW5eBV9nal"
 
+#define URL_BUY_LOGIN @"http://localhost:8080/wallet/#/intermediate"
+
+#define WEBKIT_HANDLER_BUY_COMPLETED @"buyCompleted"
+
 #define INFORMATION_RECEIVE_URL @"https://support.blockchain.com/hc/en-us/articles/210353663-Why-is-my-bitcoin-address-changing"
+
+#define URL_SUFFIX_EVENT_NAME_ARGUMENT @"/event?name=%@"
+#define WALLET_EVENT_TX_FROM_QR @"wallet_ios_tx_from_qr"
+#define WALLET_EVENT_TX_FROM_PASTE @"wallet_ios_tx_from_paste"
+#define WALLET_EVENT_TX_FROM_URI @"wallet_ios_tx_from_uri"
+#define WALLET_EVENT_TX_FROM_DROPDOWN @"wallet_ios_tx_from_dropdown"
+
+#define URL_INFORMATION_RECEIVE @"https://support.blockchain.com/hc/en-us/articles/210353663-Why-is-my-bitcoin-address-changing"
 
 #define SOUND_FORMAT @"wav"
 
@@ -412,6 +420,7 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 #define USER_DEFAULTS_KEY_DEBUG_ENABLE_CERTIFICATE_PINNING @"certificatePinning"
 #define USER_DEFAULTS_KEY_DEBUG_SIMULATE_SURGE @"simulateSurge"
 #define USER_DEFAULTS_KEY_DEBUG_ENABLE_TESTNET @"testnet"
+#define USER_DEFAULTS_KEY_DEBUG_SIMULATE_ZERO_TICKER @"zeroTicker"
 
 #define USER_DEFAULTS_KEY_DEBUG_APP_REVIEW_PROMPT_CUSTOM_TIMER @"appReviewPromptTimer"
 #define USER_DEFAULTS_KEY_HAS_SEEN_SURVEY_PROMPT @"hasSeenSurveyPrompt"
@@ -446,7 +455,7 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 #define NIB_NAME_MERCHANT_MAP_VIEW @"MerchantMapView"
 #define NIB_NAME_RECEIVE_COINS @"ReceiveCoins"
 
-#define SUPPORT_URL @"https://support.blockchain.com"
+#define URL_SUPPORT @"https://support.blockchain.com"
 
 #define UNSAFE_CHECK_PATH_CYDIA @"/Applications/Cydia.app"
 #define UNSAFE_CHECK_PATH_MOBILE_SUBSTRATE @"/Library/MobileSubstrate/MobileSubstrate.dylib"
