@@ -13,5 +13,7 @@
 @property (nonatomic) id<TradeWatcherDelegate>delegate;
 - (id)init;
 - (void)loginWithGuid:(NSString *)guid sharedKey:(NSString *)sharedKey password:(NSString *)password;
-- (void)loginWithJson:(NSString *)guid password:(NSString *)password;
+- (void)loginWithJson:(NSString *)guid externalJson:(NSString *)externalJson magicHash:(NSString *)magicHash password:(NSString *)password;
+- (void)runScript:(NSString *)script;
+- (void)runScriptWhenReady:(NSString *)script;
 @end

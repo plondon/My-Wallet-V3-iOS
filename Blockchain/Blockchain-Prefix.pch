@@ -14,7 +14,7 @@
     #import "LocalizationConstants.h"
 #endif
 
-// #define ENABLE_DEBUG_MENU 1
+#define ENABLE_DEBUG_MENU 1
 
 #define ENABLE_TRANSFER_FUNDS 1
 #define ENABLE_TRANSACTION_FILTERING 1
@@ -265,9 +265,12 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 
 #define URL_SURVEY @"https://blockchain.co1.qualtrics.com/SE/?SID=SV_8c6uSMW5eBV9nal"
 
-#define URL_BUY_LOGIN @"http://localhost:8080/wallet/#/intermediate"
+//#define URL_BUY_LOGIN @"http://localhost:8080/wallet/#/intermediate"
+//#define URL_BUY_LOGIN @"http://10.0.0.175:8080/wallet/#/intermediate"
+#define URL_BUY_LOGIN @"http://local.blockchain.com:8080/wallet/#/intermediate"
 
 #define WEBKIT_HANDLER_BUY_COMPLETED @"buyCompleted"
+#define WEBKIT_HANDLER_FRONTEND_INITIALIZED @"frontendInitialized"
 
 #define INFORMATION_RECEIVE_URL @"https://support.blockchain.com/hc/en-us/articles/210353663-Why-is-my-bitcoin-address-changing"
 
