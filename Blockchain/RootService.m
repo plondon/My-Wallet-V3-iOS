@@ -1493,9 +1493,9 @@ void (^secondPasswordSuccess)(NSString *);
 
 - (void)buyBitcoinClicked:(id)sender
 {
-    NSString *json = [[app.wallet executeJSSynchronous:@"JSON.stringify(MyWallet.wallet.toJSON())"] toString];
-    NSString *externalJson = [[app.wallet executeJSSynchronous:@"JSON.stringify(MyWallet.wallet.external.toJSON())"] toString];
-    NSString *magicHash = [[app.wallet executeJSSynchronous:@"Blockchain.MyWallet.wallet._external._metadata._magicHash.toString('hex')"] toString];
+    NSString *json = [[app.wallet executeJSSynchronous:@"JSON.stringify(MyWalletPhone.MyWallet.wallet.toJSON())"] toString];
+    NSString *externalJson = [[app.wallet executeJSSynchronous:@"JSON.stringify(MyWalletPhone.MyWallet.wallet.external.toJSON())"] toString];
+    NSString *magicHash = [[app.wallet executeJSSynchronous:@"MyWalletPhone.MyWallet.wallet._external._metadata._magicHash.toString('hex')"] toString];
     DLog("magic hash: '%@'", magicHash);
     [self.buyBitcoinViewController loginWithJson:json externalJson:externalJson magicHash:magicHash password:self.wallet.password];
     self.buyBitcoinViewController.delegate = app.wallet;
