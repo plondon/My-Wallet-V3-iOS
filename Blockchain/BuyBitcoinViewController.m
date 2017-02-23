@@ -42,7 +42,7 @@ NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
         self.webView.scrollView.scrollEnabled = NO;
         self.automaticallyAdjustsScrollViewInsets = NO;
         
-        NSURL *login = [NSURL URLWithString:URL_BUY_LOGIN];
+        NSURL *login = [NSURL URLWithString:URL_BUY_WEBVIEW];
         NSURLRequest *request = [NSURLRequest requestWithURL:login cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval: 10.0];
         [self.webView loadRequest:request];
         
