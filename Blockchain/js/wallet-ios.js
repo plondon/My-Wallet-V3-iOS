@@ -1,5 +1,19 @@
-var Buffer = Blockchain.Buffer;
+var assert = require('assert');
+var Buffer = require('buffer').Buffer;
 
+// Must happen *before* requiring My-Wallet-V3
+global.self = global;
+
+global.crypto = {
+  getRandomValues: function (intArray) {
+    // TODO: Figure out why asserts don't stop execution here
+    var random = objc_getRandomValues(intArray);
+    var randomBuffer = new Buffer(random, 'hex');
+    intArray.set(randomBuffer);
+  }
+}
+
+var Blockchain = require('My-Wallet-V3');
 var MyWallet = Blockchain.MyWallet;
 var WalletStore = Blockchain.WalletStore;
 var WalletCrypto = Blockchain.WalletCrypto;
@@ -17,6 +31,16 @@ var Networks = Blockchain.Networks;
 var ECDSA = Blockchain.ECDSA;
 var Metadata = Blockchain.Metadata;
 
+var MyWalletPhone = module.exports = {};
+
+// Expose modules for use in obj-c
+MyWalletPhone.MyWallet = MyWallet;
+MyWalletPhone.WalletCrypto = WalletCrypto;
+MyWalletPhone.Helpers = Helpers;
+MyWalletPhone.Bitcoin = Bitcoin;
+MyWalletPhone.BigInteger = BigInteger;
+MyWalletPhone.Buffer = Buffer
+
 APP_NAME = 'javascript_iphone_app';
 APP_VERSION = '3.0';
 API_CODE = '35e77459-723f-48b0-8c9e-6e9e8f54fbd3';
@@ -28,7 +52,6 @@ BlockchainAPI.API_CODE = API_CODE;
 BlockchainAPI.AJAX_TIMEOUT = 30000; // 30 seconds
 BlockchainAPI.API_ROOT_URL = 'https://api.blockchain.info/'
 
-var MyWalletPhone = {};
 var currentPayment = null;
 var transferAllBackupPayment = null;
 var transferAllPayments = {};
@@ -1339,10 +1362,6 @@ MyWalletPhone.getSecondPassword = function(callback) {
 
 
 // Overrides
-
-RNG.randomBytes = function(nBytes) {
-    return Buffer(objc_getRandomBytes(nBytes), 'hex');
-}
 
 MyWallet.socketConnect = function() {
     // override socketConnect to prevent memory leaks

@@ -79,7 +79,6 @@
 @property (strong, nonatomic) SettingsNavigationController *settingsNavigationController;
 @property (strong, nonatomic) AccountsAndAddressesNavigationController *accountsAndAddressesNavigationController;
 
-@property (strong, nonatomic) IBOutlet UIImageView *mainLogoImageView;
 @property (strong, nonatomic) IBOutlet UILabel *mainTitleLabel;
 
 @property (nonatomic, assign) UIBackgroundTaskIdentifier backgroundUpdateTask;
@@ -106,6 +105,7 @@
 @property(nonatomic, strong) NSNumberFormatter *localCurrencyFormatter;
 
 @property (nonatomic) BOOL changedPassword;
+@property (nonatomic) BOOL isVerifyingMobileNumber;
 
 // Certificate Pinning
 @property (nonatomic) CertificatePinner *certificatePinner;

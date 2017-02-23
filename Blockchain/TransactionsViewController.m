@@ -464,7 +464,6 @@ int lastNumberTransactions = INT_MAX;
     [app reloadTransactionFilterLabel];
 #else
     [self hideFilterLabel];
-    app.mainLogoImageView.hidden = NO;
 #endif
 }
 
@@ -475,7 +474,6 @@ int lastNumberTransactions = INT_MAX;
     app.wallet.isFetchingTransactions = NO;
     filterLabel.hidden = YES;
 #endif
-    app.mainLogoImageView.hidden = YES;
     app.mainTitleLabel.hidden = NO;
 }
 

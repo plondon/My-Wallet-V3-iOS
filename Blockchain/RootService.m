@@ -176,8 +176,8 @@ void (^secondPasswordSuccess)(NSString *);
     NSSetUncaughtExceptionHandler(&HandleException);
 #endif
     
-    // White status bar
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+    // Black status bar
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
     
     [[NSNotificationCenter defaultCenter] addObserverForName:NOTIFICATION_KEY_LOADING_TEXT object:nil queue:nil usingBlock:^(NSNotification * notification) {
         self.loadingText = [notification object];
@@ -567,7 +567,6 @@ void (^secondPasswordSuccess)(NSString *);
     _transactionsViewController.filterIndex = accountIndex;
     [_transactionsViewController changeFilterLabel:[app.wallet getLabelForAccount:accountIndex]];
     [_transactionsViewController showFilterLabel];
-    self.mainLogoImageView.hidden = YES;
     
     [_sendViewController resetFromAddress];
     [_receiveViewController reloadMainAddress];
@@ -583,7 +582,6 @@ void (^secondPasswordSuccess)(NSString *);
     _transactionsViewController.filterIndex = FILTER_INDEX_IMPORTED_ADDRESSES;
     [_transactionsViewController changeFilterLabel:BC_STRING_IMPORTED_ADDRESSES];
     [_transactionsViewController showFilterLabel];
-    self.mainLogoImageView.hidden = YES;
     
     [self.wallet reloadFilter];
     
@@ -595,7 +593,6 @@ void (^secondPasswordSuccess)(NSString *);
     _transactionsViewController.clickedFetchMore = NO;
     _transactionsViewController.filterIndex = FILTER_INDEX_ALL;
     [_transactionsViewController hideFilterLabel];
-    self.mainLogoImageView.hidden = NO;
     [self.wallet reloadFilter];
     
     [self showFilterResults];
@@ -1365,6 +1362,8 @@ void (^secondPasswordSuccess)(NSString *);
     } @catch (NSException * e) {
         DLog(@"Animation Exception %@", e);
     }
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
 }
 
 - (void)didFailBackupWallet
@@ -1409,17 +1408,20 @@ void (^secondPasswordSuccess)(NSString *);
     PairingCodeParser * pairingCodeParser = [[PairingCodeParser alloc] initWithSuccess:^(NSDictionary*code) {
         DLog(@"scanAndParse success");
         
-        [app forgetWallet];
-        
-        [app clearPin];
-        
-        [self.wallet loadWalletWithGuid:[code objectForKey:QR_CODE_KEY_GUID] sharedKey:[code objectForKey:QR_CODE_KEY_SHARED_KEY] password:[code objectForKey:QR_CODE_KEY_PASSWORD]];
-        
-        self.wallet.delegate = self;
-        
-        wallet.didPairAutomatically = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [app forgetWallet];
+            
+            [app clearPin];
+            
+            self.wallet.delegate = self;
+            
+            [self.wallet loadWalletWithGuid:[code objectForKey:QR_CODE_KEY_GUID] sharedKey:[code objectForKey:QR_CODE_KEY_SHARED_KEY] password:[code objectForKey:QR_CODE_KEY_PASSWORD]];
+            
+            wallet.didPairAutomatically = YES;
+        });
         
     } error:^(NSString*error) {
+        [app hideBusyView];
         [app standardNotify:error];
     }];
     
@@ -1517,6 +1519,8 @@ void (^secondPasswordSuccess)(NSString *);
     
     self.merchantViewController = nil;
     self.receiveViewController = nil;
+    
+    self.isVerifyingMobileNumber = NO;
     
     [KeychainItemWrapper removeGuidFromKeychain];
     [KeychainItemWrapper removeSharedKeyFromKeychain];
@@ -1935,20 +1939,6 @@ void (^secondPasswordSuccess)(NSString *);
     }];
 }
 
-- (void)showSecurityCenter
-{
-    if (!_settingsNavigationController) {
-        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:STORYBOARD_NAME_SETTINGS bundle: nil];
-        self.settingsNavigationController = [storyboard instantiateViewControllerWithIdentifier:NAVIGATION_CONTROLLER_NAME_SETTINGS];
-    }
-    
-    self.topViewControllerDelegate = self.settingsNavigationController;
-    [self.settingsNavigationController showSecurityCenter];
-    
-    self.settingsNavigationController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-    [_tabViewController presentViewController:self.settingsNavigationController animated:YES completion:nil];
-}
-
 - (void)showSettings
 {
     [self showSettings:nil];
@@ -1966,6 +1956,8 @@ void (^secondPasswordSuccess)(NSString *);
     
     self.settingsNavigationController.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     [_tabViewController presentViewController:self.settingsNavigationController animated:YES completion:completionBlock];
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
 }
 
 - (void)showSupport
@@ -2055,6 +2047,8 @@ void (^secondPasswordSuccess)(NSString *);
     self.wallet.didPairAutomatically = NO;
     
     [self hideBusyView];
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
 }
 
 - (void)showStatusBar
@@ -2092,6 +2086,8 @@ void (^secondPasswordSuccess)(NSString *);
     [welcomeView.recoverWalletButton addTarget:self action:@selector(showRecoverWallet:) forControlEvents:UIControlEventTouchUpInside];
     
     [app showModalWithContent:welcomeView closeType:ModalCloseTypeNone showHeader:NO headerText:nil onDismiss:nil onResume:nil];
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
 }
 
 - (void)showSecurityReminder
@@ -2212,7 +2208,6 @@ void (^secondPasswordSuccess)(NSString *);
 {
 #ifdef ENABLE_TRANSACTION_FILTERING
     if ([app.wallet didUpgradeToHd] && ([app.wallet hasLegacyAddresses] || [app.wallet getActiveAccountsCount] >= 2) && self.filterIndex != FILTER_INDEX_ALL) {
-        app.mainLogoImageView.hidden = YES;
         if (_tabViewController.activeViewController == _transactionsViewController) {
             [_transactionsViewController showFilterLabel];
         } else {
@@ -2220,7 +2215,6 @@ void (^secondPasswordSuccess)(NSString *);
         }
     } else {
         [_transactionsViewController hideFilterLabel];
-        app.mainLogoImageView.hidden = _tabViewController.activeViewController == _transactionsViewController ? NO : YES;
     }
 #endif
 }
@@ -2284,6 +2278,8 @@ void (^secondPasswordSuccess)(NSString *);
     }
     
     [app.window.rootViewController.view addSubview:self.pinEntryViewController.view];
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
 }
 
 - (void)changePIN
@@ -2302,6 +2298,8 @@ void (^secondPasswordSuccess)(NSString *);
     [self.tabViewController dismissViewControllerAnimated:YES completion:nil];
     
     [app.window.rootViewController.view addSubview:self.pinEntryViewController.view];
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
 }
 
 - (void)clearPin
@@ -2333,6 +2331,8 @@ void (^secondPasswordSuccess)(NSString *);
     }
     
     self.pinEntryViewController = nil;
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
 }
 
 - (IBAction)logoutClicked:(id)sender
@@ -2455,6 +2455,7 @@ void (^secondPasswordSuccess)(NSString *);
 
 - (void)setupTransferAllFunds
 {
+    self.transferAllFundsModalController = nil;
     app.topViewControllerDelegate = nil;
     
     if (!app.sendViewController) {

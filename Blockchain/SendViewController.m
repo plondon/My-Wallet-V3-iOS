@@ -847,7 +847,7 @@ BOOL displayingLocalSymbolSend;
         } else {
             [self enablePaymentButtons];
             
-            feeField.textColor = [UIColor blackColor];
+            feeField.textColor = COLOR_TEXT_DARK_GRAY;
             [self removeHighlightFromAmounts];
         }
     }
@@ -863,8 +863,8 @@ BOOL displayingLocalSymbolSend;
 
 - (void)removeHighlightFromAmounts
 {
-    btcAmountField.textColor = [UIColor blackColor];
-    fiatAmountField.textColor = [UIColor blackColor];
+    btcAmountField.textColor = COLOR_TEXT_DARK_GRAY;
+    fiatAmountField.textColor = COLOR_TEXT_DARK_GRAY;
 }
 
 - (void)disablePaymentButtons
@@ -882,11 +882,11 @@ BOOL displayingLocalSymbolSend;
 {
     continuePaymentButton.enabled = YES;
     [continuePaymentButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [continuePaymentButton setBackgroundColor:COLOR_BUTTON_GREEN];
+    [continuePaymentButton setBackgroundColor:COLOR_BLOCKCHAIN_LIGHT_BLUE];
     
     [continuePaymentAccessoryButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     continuePaymentAccessoryButton.enabled = YES;
-    [continuePaymentAccessoryButton setBackgroundColor:COLOR_BUTTON_GREEN];
+    [continuePaymentAccessoryButton setBackgroundColor:COLOR_BLOCKCHAIN_LIGHT_BLUE];
 }
 
 - (void)setAmountFromUrlHandler:(NSString*)amountString withToAddress:(NSString*)addressString
@@ -1306,7 +1306,7 @@ BOOL displayingLocalSymbolSend;
                 textField.textColor = [UIColor redColor];
                 [self disablePaymentButtons];
             } else {
-                textField.textColor = [UIColor blackColor];
+                textField.textColor = COLOR_TEXT_DARK_GRAY;
                 [self enablePaymentButtons];
             }
             
@@ -1613,7 +1613,7 @@ BOOL displayingLocalSymbolSend;
         return;
     }
     
-    BCAddressSelectionView *addressSelectionView = [[BCAddressSelectionView alloc] initWithWallet:app.wallet showOwnAddresses:YES allSelectable:NO accountsOnly:NO];
+    BCAddressSelectionView *addressSelectionView = [[BCAddressSelectionView alloc] initWithWallet:app.wallet selectMode:SelectModeSendFrom];
     addressSelectionView.delegate = self;
     
     [app showModalWithContent:addressSelectionView closeType:ModalCloseTypeBack showHeader:YES headerText:BC_STRING_SEND_FROM onDismiss:nil onResume:nil];
@@ -1626,7 +1626,7 @@ BOOL displayingLocalSymbolSend;
         return;
     }
     
-    BCAddressSelectionView *addressSelectionView = [[BCAddressSelectionView alloc] initWithWallet:app.wallet showOwnAddresses:NO allSelectable:YES accountsOnly:NO];
+    BCAddressSelectionView *addressSelectionView = [[BCAddressSelectionView alloc] initWithWallet:app.wallet selectMode:SelectModeSendTo];
     addressSelectionView.delegate = self;
     
     [app showModalWithContent:addressSelectionView closeType:ModalCloseTypeBack showHeader:YES headerText:BC_STRING_SEND_TO onDismiss:nil onResume:nil];

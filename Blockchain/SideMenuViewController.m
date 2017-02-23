@@ -320,7 +320,7 @@ int accountEntries = 0;
 #ifdef ENABLE_TRANSACTION_FILTERING
         UITableViewHeaderFooterView *view = [[UITableViewHeaderFooterView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, BALANCE_ENTRY_HEIGHT)];
         UIView *backgroundView = [[UIView alloc] initWithFrame:view.frame];
-        [backgroundView setBackgroundColor: [app filterIndex] == FILTER_INDEX_ALL ? COLOR_BLOCKCHAIN_LIGHT_BLUE : COLOR_BLOCKCHAIN_BLUE];
+        [backgroundView setBackgroundColor: [app filterIndex] == FILTER_INDEX_ALL ? COLOR_BLOCKCHAIN_DARK_BLUE : COLOR_BLOCKCHAIN_BLUE];
         view.backgroundView = backgroundView;
         UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(removeTransactionsFilter)];
         [view addGestureRecognizer:tapGestureRecognizer];
@@ -333,17 +333,13 @@ int accountEntries = 0;
         UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(56, 10, self.tableView.frame.size.width - 100, 18)];
         headerLabel.text = BC_STRING_TOTAL_BALANCE;
         headerLabel.textColor = [UIColor whiteColor];
-        headerLabel.font = [UIFont boldSystemFontOfSize:17.0];
+        headerLabel.font = [UIFont fontWithName:FONT_MONTSERRAT_REGULAR size:17];
         [view addSubview:headerLabel];
-        
-        UIImageView *icon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wallet.png"]];
-        icon.frame = CGRectMake(18, 13, 20, 18);
-        [view addSubview:icon];
         
         UILabel *amountLabel = [[UILabel alloc] initWithFrame:CGRectMake(56, 24, self.tableView.frame.size.width - 100, 30)];
         amountLabel.text = [NSNumberFormatter formatMoney:totalBalance localCurrency:app->symbolLocal];;
         amountLabel.textColor = [UIColor whiteColor];
-        amountLabel.font = [UIFont boldSystemFontOfSize:17.0];
+        amountLabel.font = [UIFont fontWithName:FONT_MONTSERRAT_REGULAR size:17];
         [view addSubview:amountLabel];
         
         BCLine *bottomSeparator = [[BCLine alloc] initWithFrame:CGRectMake(56, BALANCE_ENTRY_HEIGHT, self.tableView.frame.size.width, 1.0/[UIScreen mainScreen].scale)];
@@ -386,7 +382,7 @@ int accountEntries = 0;
             cell = [[SideMenuViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellIdentifier];
             
             UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, cell.frame.size.width, cell.frame.size.height)];
-            [v setBackgroundColor:COLOR_BLOCKCHAIN_BLUE];
+            [v setBackgroundColor:COLOR_TABLE_VIEW_CELL_SELECTED_LIGHT_GRAY];
             cell.selectedBackgroundView = v;
         }
         NSString *upgradeOrBackupTitle;
@@ -406,23 +402,15 @@ int accountEntries = 0;
             upgradeOrBackupImage = @"icon_upgrade";
         }
         else {
-            upgradeOrBackupImage = @"security";
+            upgradeOrBackupImage = @"lock";
         }
         NSMutableArray *images;
 
-        images = [NSMutableArray arrayWithArray:@[upgradeOrBackupImage, @"settings_icon", @"icon_wallet", @"icon_merchant", @"icon_support", @"logout_icon", @"icon_buy"]];
+        images = [NSMutableArray arrayWithArray:@[upgradeOrBackupImage, @"settings", @"wallet", @"merchant", @"help", @"logout", @"icon_buy"]];
         
         cell.textLabel.text = titles[indexPath.row];
         cell.textLabel.adjustsFontSizeToFitWidth = YES;
         cell.imageView.image = [UIImage imageNamed:images[indexPath.row]];
-        
-        if ([images[indexPath.row] isEqualToString:@"security"]) {
-            cell.imageView.image = [cell.imageView.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-            [cell.imageView setTintColor:COLOR_BLOCKCHAIN_LIGHT_BLUE];
-        } else if ([images[indexPath.row] isEqualToString:@"icon_buy"]) {
-            cell.imageView.image = [cell.imageView.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-            [cell.imageView setTintColor:COLOR_BLOCKCHAIN_LIGHT_BLUE];
-        }
         
         return cell;
     }
@@ -437,7 +425,7 @@ int accountEntries = 0;
 #ifdef ENABLE_TRANSACTION_FILTERING
             cell.selectionStyle = UITableViewCellSelectionStyleDefault;
             UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, cell.frame.size.width, cell.frame.size.height)];
-            [v setBackgroundColor:COLOR_BLOCKCHAIN_LIGHT_BLUE];
+            [v setBackgroundColor:COLOR_BLOCKCHAIN_DARK_BLUE];
             cell.selectedBackgroundView = v;
 #else
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -463,7 +451,6 @@ int accountEntries = 0;
         // Total legacy balance
         else {
             uint64_t legacyBalance = [app.wallet getTotalBalanceForActiveLegacyAddresses];
-            [cell.iconImage setImage:[UIImage imageNamed:@"importedaddress"]];
             cell.amountLabel.text = [NSNumberFormatter formatMoney:legacyBalance localCurrency:app->symbolLocal];
             cell.labelLabel.text = BC_STRING_IMPORTED_ADDRESSES;
 #ifdef ENABLE_TRANSACTION_FILTERING
@@ -486,19 +473,13 @@ int accountEntries = 0;
             float leftInset = (indexPath.section != 1) ? 56 : 15;
             [cell setSeparatorInset:UIEdgeInsetsMake(0, leftInset, 0, 0)];
             
-            // No separator for last entry of each section
-            if ((indexPath.section == 0 && indexPath.row == balanceEntries - 1) ||
-                (indexPath.section == 1 && indexPath.row == menuEntries - 1)) {
+            // No separator for non-account side menu items
+            if ((indexPath.section == 0 && indexPath.row == balanceEntries - 1) || indexPath.section == 1) {
                 [cell setSeparatorInset:UIEdgeInsetsMake(0, 15, 0, CGRectGetWidth(cell.bounds)-15)];
             }
         } else {
-            // Custom separator inset
-            [cell setSeparatorInset:UIEdgeInsetsMake(0, 15, 0, 0)];
-            
-            // No separator for last entry of each section
-            if (indexPath.row == menuEntries - 1) {
-                [cell setSeparatorInset:UIEdgeInsetsMake(0, 15, 0, CGRectGetWidth(cell.bounds)-15)];
-            }
+            // No separator
+            [cell setSeparatorInset:UIEdgeInsetsMake(0, 15, 0, CGRectGetWidth(cell.bounds)-15)];
         }
     }
 }
