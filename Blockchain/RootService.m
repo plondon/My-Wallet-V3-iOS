@@ -1490,11 +1490,11 @@ void (^secondPasswordSuccess)(NSString *);
 
 - (void)buyBitcoinClicked:(id)sender
 {
-    NSString *json = [[app.wallet executeJSSynchronous:@"JSON.stringify(MyWalletPhone.MyWallet.wallet.toJSON())"] toString];
-    NSString *externalJson = [[app.wallet executeJSSynchronous:@"JSON.stringify(MyWalletPhone.MyWallet.wallet.external.toJSON())"] toString];
-    NSString *magicHash = [[app.wallet executeJSSynchronous:@"MyWalletPhone.MyWallet.wallet._external._metadata._magicHash.toString('hex')"] toString];
-    DLog("magic hash: '%@'", magicHash);
-    [self.buyBitcoinViewController loginWithJson:json externalJson:externalJson magicHash:magicHash password:self.wallet.password];
+    NSDictionary *loginData = [[app.wallet executeJSSynchronous:@"MyWalletPhone.getWebViewLoginData()"] toDictionary];
+    NSString *walletJson = loginData[@"walletJson"];
+    NSString *externalJson = loginData[@"externalJson"];
+    NSString *magicHash = [loginData[@"magicHash"] isEqual:[NSNull null]] ? nil : loginData[@"magicHash"];
+    [self.buyBitcoinViewController loginWithJson:walletJson externalJson:externalJson magicHash:magicHash password:self.wallet.password];
     self.buyBitcoinViewController.delegate = app.wallet;
     BCNavigationController *navigationController = [[BCNavigationController alloc] initWithRootViewController:self.buyBitcoinViewController title:BC_STRING_BUY_BITCOIN];
     [_tabViewController presentViewController:navigationController animated:YES completion:nil];

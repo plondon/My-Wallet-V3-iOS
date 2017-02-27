@@ -721,7 +721,10 @@ MyWalletPhone.login = function(user_guid, shared_key, resend_code, inputedPasswo
         didBuildHD: build_hd_success
     }
 
-    MyWallet.login(user_guid, inputedPassword, credentials, callbacks).then(success).catch(other_error);
+    MyWallet.login(user_guid, inputedPassword, credentials, callbacks)
+      .then(function () { return MyWallet.wallet.fetchAccountInfo() })
+      .then(function () { return MyWallet.wallet.loadExternal() })
+      .then(success).catch(other_error);
 };
 
 MyWalletPhone.getInfoForTransferAllFundsToAccount = function() {
@@ -1929,6 +1932,50 @@ MyWalletPhone.getPendingTrades = function() {
               });
       });
     });
+}
+
+MyWalletPhone.getWebViewLoginData = function () {
+  let wallet = MyWallet.wallet
+  let magicHash = wallet.external._metadata._magicHash
+  return {
+    walletJson: JSON.stringify(wallet.toJSON()),
+    externalJson: JSON.stringify(wallet.external.toJSON()),
+    magicHash: magicHash ? magicHash.toString('hex') : null
+  }
+}
+
+MyWalletPhone.isBuyFeatureEnabled = function () {
+  let wallet = MyWallet.wallet
+  return wallet.external && wallet.external.canBuy(wallet.accountInfo, getOptions())
+}
+
+// TODO: move to separate module once a proper bundler is in place
+function getOptions () {
+  return ({
+    "showBuySellTab": ["GB", "NL", "DE", "US"],
+    "partners": {
+      "coinify": {
+        "countries": ["GB", "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI",
+                      "FR", "GF", "DE", "GI", "GR", "GP", "GG", "HU", "IS", "IE",
+                      "IM", "IT", "JE", "LV", "LI", "LT", "LU", "MT", "MQ", "YT",
+                      "MC", "NL", "NO", "PL", "PT", "RE", "BL", "MF", "PM", "SM",
+                      "SK", "SI", "ES", "SE", "CH"
+                    ],
+        "partnerId": 18,
+        "iSignThisDomain": "https://stage-verify.isignthis.com"
+      },
+      "sfox": {
+        "countries": ["US"],
+        "states": ["AL", "AZ", "CA", "CO", "GA", "IN", "KS", "MD", "MA", "MO", "MT", "SC", "TX"],
+        "inviteFormFraction": 0.1,
+        "showCheckoutFraction": 0.5,
+        "apiKey": "6CD61A0E965D48A7B1883A860490DC9E",
+        "plaid": "0b041cd9e9fbf1e7d93a0d5a39f5b9",
+        "plaidEnv": "tartan",
+        "siftScience": "3884e5fae5"
+      }
+    }
+  })
 }
 
 MyWalletPhone.getNetworks = function() {
