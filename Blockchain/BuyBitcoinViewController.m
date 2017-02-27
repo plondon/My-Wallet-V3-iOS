@@ -71,7 +71,7 @@ NSString* funcWithArgs(NSString* name, NSString* a1, NSString* a2, NSString* a3,
 - (void)runScript:(NSString *)script
 {
     [self.webView evaluateJavaScript:script completionHandler:^(id result, NSError * _Nullable error) {
-        DLog(@"Ran script [%@] with result %@, error %@", script, result, error);
+        DLog(@"Ran script with result %@, error %@", result, error);
     }];
 }
 
@@ -105,8 +105,11 @@ NSString* funcWithArgs(NSString* name, NSString* a1, NSString* a2, NSString* a3,
     [super viewWillDisappear:animated];
     if (self.didInitiateTrade) {
         [self.delegate watchPendingTrades];
+    } else {
+        [self.delegate fetchExchangeAccount];
     }
     [self runScript:@"teardown()"];
+    self.didInitiateTrade = NO;
     self.isReady = NO;
 }
 

@@ -723,7 +723,6 @@ MyWalletPhone.login = function(user_guid, shared_key, resend_code, inputedPasswo
 
     MyWallet.login(user_guid, inputedPassword, credentials, callbacks)
       .then(function () { return MyWallet.wallet.fetchAccountInfo() })
-      .then(function () { return MyWallet.wallet.loadExternal() })
       .then(success).catch(other_error);
 };
 
@@ -1890,48 +1889,56 @@ MyWalletPhone.precisionToSatoshiBN = function (x, conversion) {
     return MyWalletPhone.parseValueBitcoin(x).divide(BigInteger.valueOf(Math.pow(10, sShift(conversion).toString())));
 }
 
-MyWalletPhone.getPendingTrades = function() {
-    console.log('Getting pending trades');
-    MyWallet.wallet.loadExternal().then(function () {
-      var sfox = MyWallet.wallet.external.sfox;
-      var coinify = MyWallet.wallet.external.coinify;
+MyWalletPhone.getExchangeAccount = function () {
+  console.log('Getting exchange account');
+  return MyWallet.wallet.loadExternal().then(function () {
+    var sfox = MyWallet.wallet.external.sfox;
+    var coinify = MyWallet.wallet.external.coinify;
+    var partners = getOptions().partners;
 
-      var sfoxAccountFound = false;
-      var coinifyAccountFound = false;
-
+    if (sfox.user) {
+      console.log('Found sfox user');
       sfox.api.production = true;
-
-      if (sfox.user) {
-          console.log('Found sfox user');
-          console.log(sfox.user);
-          sfoxAccountFound = true;
-      }
-      if (coinify.user) {
-          console.log('Found coinify user');
-          console.log(coinify.user);
-          coinifyAccountFound = true;
-      }
-      if (!sfoxAccountFound && !coinifyAccountFound) return;
-
       sfox.api.apiKey = 'f31614a7-5074-49f2-8c2a-bfb8e55de2bd';
-      sfox.getTrades().then(function () {
-          sfox.monitorPayments();
-          sfox.trades
-              .filter(function (trade) { return !trade.txHash; })
-              .forEach(function (trade) {
-                  console.log('watching ' + trade.receiveAddress);
-                  trade.watchAddress().then(function () {
-                      console.log('trade complete ' + trade.receiveAddress);
-                      var tradeObj = {
-                         createdAt: trade.createdAt,
-                         receiveAddress: trade.receiveAddress,
-                         txHash: trade.txHash
-                      }
-                      objc_show_completed_trade(tradeObj);
-                  });
-              });
-      });
+      sfox.api.apiKey = partners.sfox.apiKey;
+      return sfox;
+    } else if (coinify.user) {
+      console.log('Found coinify user');
+      coinify.partnerId = partners.coinify.partnerId;
+      return coinify;
+    } else {
+      console.log('Found no sfox or coinify user');
+    }
+  });
+}
+
+var tradeToObject = function (trade) {
+  return {
+    createdAt: new Date(trade.createdAt).toLocaleString(),
+    receiveAddress: trade.receiveAddress,
+    txHash: trade.txHash
+  }
+}
+
+var watchTrade = function (trade) {
+  console.log('watching ' + trade.receiveAddress);
+  trade.watchAddress().then(function () {
+    console.log('trade complete ' + trade.receiveAddress);
+    objc_show_completed_trade(tradeToObject(trade));
+  });
+}
+
+MyWalletPhone.getPendingTrades = function() {
+  MyWalletPhone.getExchangeAccount().then(function (exchange) {
+    console.log('Getting pending trades');
+    exchange.getTrades().then(function () {
+      console.log(exchange.trades);
+      exchange.monitorPayments();
+      exchange.trades
+        .filter(function (trade) { return !trade.txHash; })
+        .forEach(watchTrade);
     });
+  });
 }
 
 MyWalletPhone.getWebViewLoginData = function () {

@@ -99,7 +99,7 @@ int accountEntries = 0;
     [self addMenuRow:BC_STRING_SUPPORT icon:@"help"];
     [self addMenuRow:BC_STRING_LOGOUT icon:@"logout"];
 
-    if ([[app.wallet executeJSSynchronous:@"MyWalletPhone.isBuyFeatureEnabled()"] toBool]) {
+    if ([app.wallet isBuyEnabled]) {
         [self addMenuRow:BC_STRING_BUY_BITCOIN icon:@"icon_buy"];
     }
 
