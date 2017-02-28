@@ -100,7 +100,7 @@ int accountEntries = 0;
     [self addMenuEntry:BC_STRING_LOGOUT icon:@"logout"];
 
     if ([app.wallet isBuyEnabled]) {
-        [self addMenuEntry:BC_STRING_BUY_BITCOIN icon:@"icon_buy"];
+        [self addMenuEntry:BC_STRING_BUY_BITCOIN icon:@"bitcoin"];
     }
 
     [self setSideMenuGestures];
