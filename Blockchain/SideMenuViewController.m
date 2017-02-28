@@ -94,7 +94,7 @@ int accountEntries = 0;
     }
 
     [self addMenuEntry:BC_STRING_SETTINGS icon:@"settings"];
-    [self addMenuEntry:BC_STRING_ADDRESS icon:@"wallet"];
+    [self addMenuEntry:BC_STRING_ADDRESSES icon:@"wallet"];
     [self addMenuEntry:BC_STRING_MERCHANT_MAP icon:@"merchant"];
     [self addMenuEntry:BC_STRING_SUPPORT icon:@"help"];
     [self addMenuEntry:BC_STRING_LOGOUT icon:@"logout"];
