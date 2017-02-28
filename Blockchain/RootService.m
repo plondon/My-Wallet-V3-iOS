@@ -1536,6 +1536,8 @@ void (^secondPasswordSuccess)(NSString *);
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     [self transitionToIndex:1];
+    
+    [self setupBuyWebView];
 }
 
 - (void)didImportKey:(NSString *)address
