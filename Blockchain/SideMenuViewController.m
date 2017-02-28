@@ -70,13 +70,13 @@ int accountEntries = 0;
     tapToCloseGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:app action:@selector(toggleSideMenu)];
 }
 
-- (void)clearMenuRows {
+- (void)clearMenuEntries {
     self.titles = [NSMutableArray new];
     self.images = [NSMutableArray new];
     self.menuEntries = 0;
 }
 
-- (void)addMenuRow:(NSString*)name icon:(NSString*)icon {
+- (void)addMenuEntry:(NSString*)name icon:(NSString*)icon {
     [self.titles addObject:name];
     [self.images addObject:icon];
     self.menuEntries += 1;
@@ -85,22 +85,22 @@ int accountEntries = 0;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [self clearMenuRows];
+    [self clearMenuEntries];
 
     if (!app.wallet.didUpgradeToHd) {
-        [self addMenuRow:BC_STRING_UPGRADE icon:@"icon_upgrade"];
+        [self addMenuEntry:BC_STRING_UPGRADE icon:@"icon_upgrade"];
     } else {
-        [self addMenuRow:BC_STRING_BACKUP_FUNDS icon:@"lock"];
+        [self addMenuEntry:BC_STRING_BACKUP_FUNDS icon:@"lock"];
     }
 
-    [self addMenuRow:BC_STRING_SETTINGS icon:@"settings"];
-    [self addMenuRow:BC_STRING_ADDRESS icon:@"wallet"];
-    [self addMenuRow:BC_STRING_MERCHANT_MAP icon:@"merchant"];
-    [self addMenuRow:BC_STRING_SUPPORT icon:@"help"];
-    [self addMenuRow:BC_STRING_LOGOUT icon:@"logout"];
+    [self addMenuEntry:BC_STRING_SETTINGS icon:@"settings"];
+    [self addMenuEntry:BC_STRING_ADDRESS icon:@"wallet"];
+    [self addMenuEntry:BC_STRING_MERCHANT_MAP icon:@"merchant"];
+    [self addMenuEntry:BC_STRING_SUPPORT icon:@"help"];
+    [self addMenuEntry:BC_STRING_LOGOUT icon:@"logout"];
 
     if ([app.wallet isBuyEnabled]) {
-        [self addMenuRow:BC_STRING_BUY_BITCOIN icon:@"icon_buy"];
+        [self addMenuEntry:BC_STRING_BUY_BITCOIN icon:@"icon_buy"];
     }
 
     [self setSideMenuGestures];
@@ -287,26 +287,35 @@ int accountEntries = 0;
     
     NSInteger row = indexPath.row;
     BOOL didUpgradeToHD = app.wallet.didUpgradeToHd;
-    
-    if (row == MENU_CELL_INDEX_ACCOUNTS_AND_ADDRESSES) {
-        [app accountsAndAddressesClicked:nil];
-    } else if (row == MENU_CELL_INDEX_SETTINGS) {
-        [app accountSettingsClicked:nil];
-    } else if (row == MENU_CELL_INDEX_MERCHANT){
-        [app merchantClicked:nil];
-    } else if (row == MENU_CELL_INDEX_SUPPORT) {
-        [app supportClicked:nil];
-    } else if (row == MENU_CELL_INDEX_UPGRADE) {
-        if (didUpgradeToHD) {
-            [app backupFundsClicked:nil];
-        }
-        else {
-            [app showHdUpgrade];
-        }
-    } else if (row == MENU_CELL_INDEX_LOGOUT) {
-        [app logoutClicked:nil];
-    } else if (row == MENU_CELL_INDEX_BUY_BITCOIN) {
-        [app buyBitcoinClicked:nil];
+
+    switch (row) {
+        case EntryUpgradeBackup:
+            if (didUpgradeToHD) {
+                [app backupFundsClicked:nil];
+            } else {
+                [app showHdUpgrade];
+            }
+            break;
+        case EntryAccountsAndAddresses:
+            [app accountsAndAddressesClicked:nil];
+            break;
+        case EntrySettings:
+            [app accountSettingsClicked:nil];
+            break;
+        case EntryMerchantMap:
+            [app merchantClicked:nil];
+            break;
+        case EntrySupport:
+            [app supportClicked:nil];
+            break;
+        case EntryLogout:
+            [app logoutClicked:nil];
+            break;
+        case EntryBuyBitcoin:
+            [app buyBitcoinClicked:nil];
+            break;
+        default:
+            break;
     }
 }
 

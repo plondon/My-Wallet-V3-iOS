@@ -13,7 +13,17 @@
 
 - (void)reload;
 - (void)reloadTableView;
-- (void)clearMenuRows;
-- (void)addMenuRow:(NSString *)name icon:(NSString *)icon;
+- (void)clearMenuEntries;
+- (void)addMenuEntry:(NSString *)name icon:(NSString *)icon;
+
+typedef NS_ENUM(NSInteger, SideMenuViewEntries) {
+    EntryUpgradeBackup,
+    EntrySettings,
+    EntryAccountsAndAddresses,
+    EntryMerchantMap,
+    EntrySupport,
+    EntryLogout,
+    EntryBuyBitcoin
+};
 
 @end
