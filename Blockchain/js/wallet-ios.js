@@ -1942,8 +1942,8 @@ MyWalletPhone.getPendingTrades = function() {
 }
 
 MyWalletPhone.getWebViewLoginData = function () {
-  let wallet = MyWallet.wallet
-  let magicHash = wallet.external._metadata._magicHash
+  var wallet = MyWallet.wallet
+  var magicHash = wallet.external._metadata._magicHash
   return {
     walletJson: JSON.stringify(wallet.toJSON()),
     externalJson: JSON.stringify(wallet.external.toJSON()),
@@ -1952,7 +1952,7 @@ MyWalletPhone.getWebViewLoginData = function () {
 }
 
 MyWalletPhone.isBuyFeatureEnabled = function () {
-  let wallet = MyWallet.wallet
+  var wallet = MyWallet.wallet
   return wallet.external && wallet.external.canBuy(wallet.accountInfo, getOptions())
 }
 
