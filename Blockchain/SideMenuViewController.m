@@ -21,9 +21,7 @@
 @interface SideMenuViewController ()
 
 @property (strong, readwrite, nonatomic) UITableView *tableView;
-@property (nonatomic) NSMutableArray *titles;
-@property (nonatomic) NSMutableArray *images;
-@property (nonatomic) int menuEntries;
+@property (nonatomic) NSMutableArray *menuEntries;
 
 @end
 
@@ -32,6 +30,14 @@
 ECSlidingViewController *sideMenu;
 
 UITapGestureRecognizer *tapToCloseGestureRecognizer;
+
+NSString *entryKeyUpgradeBackup = @"upgrade_backup";
+NSString *entryKeySettings = @"settings";
+NSString *entryKeyAccountsAndAddresses = @"accounts_and_addresses";
+NSString *entryKeyMerchantMap = @"merchant_map";
+NSString *entryKeySupport = @"support";
+NSString *entryKeyLogout = @"logout";
+NSString *entryKeyBuyBitcoin = @"buy_bitcoin";
 
 int balanceEntries = 0;
 int accountEntries = 0;
@@ -42,7 +48,7 @@ int accountEntries = 0;
     sideMenu = app.slidingViewController;
     
     self.tableView = ({
-        UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width - sideMenu.anchorLeftPeekAmount, MENU_ENTRY_HEIGHT * self.menuEntries) style:UITableViewStylePlain];
+        UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width - sideMenu.anchorLeftPeekAmount, MENU_ENTRY_HEIGHT * self.menuEntriesCount) style:UITableViewStylePlain];
         tableView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth;
         tableView.delegate = self;
         tableView.dataSource = self;
@@ -70,16 +76,21 @@ int accountEntries = 0;
     tapToCloseGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:app action:@selector(toggleSideMenu)];
 }
 
-- (void)clearMenuEntries {
-    self.titles = [NSMutableArray new];
-    self.images = [NSMutableArray new];
-    self.menuEntries = 0;
+- (NSUInteger)menuEntriesCount {
+    return [self.menuEntries count];
 }
 
-- (void)addMenuEntry:(NSString*)name icon:(NSString*)icon {
-    [self.titles addObject:name];
-    [self.images addObject:icon];
-    self.menuEntries += 1;
+- (NSDictionary *)getMenuEntry:(NSInteger)index {
+    return [self.menuEntries objectAtIndex:index];
+}
+
+- (void)clearMenuEntries {
+    self.menuEntries = [NSMutableArray new];
+}
+
+- (void)addMenuEntry:(NSString *)key text:(NSString *)text icon:(NSString *)icon {
+    NSDictionary *entry = @{ @"key": key, @"text": text, @"icon": icon };
+    [self.menuEntries addObject:entry];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -88,19 +99,19 @@ int accountEntries = 0;
     [self clearMenuEntries];
 
     if (!app.wallet.didUpgradeToHd) {
-        [self addMenuEntry:BC_STRING_UPGRADE icon:@"icon_upgrade"];
+        [self addMenuEntry:entryKeyUpgradeBackup text:BC_STRING_UPGRADE icon:@"icon_upgrade"];
     } else {
-        [self addMenuEntry:BC_STRING_BACKUP_FUNDS icon:@"lock"];
+        [self addMenuEntry:entryKeyUpgradeBackup text:BC_STRING_BACKUP_FUNDS icon:@"lock"];
     }
 
-    [self addMenuEntry:BC_STRING_SETTINGS icon:@"settings"];
-    [self addMenuEntry:BC_STRING_ADDRESSES icon:@"wallet"];
-    [self addMenuEntry:BC_STRING_MERCHANT_MAP icon:@"merchant"];
-    [self addMenuEntry:BC_STRING_SUPPORT icon:@"help"];
-    [self addMenuEntry:BC_STRING_LOGOUT icon:@"logout"];
+    [self addMenuEntry:entryKeySettings text:BC_STRING_SETTINGS icon:@"settings"];
+    [self addMenuEntry:entryKeyAccountsAndAddresses text:BC_STRING_ADDRESSES icon:@"wallet"];
+    [self addMenuEntry:entryKeyMerchantMap text:BC_STRING_MERCHANT_MAP icon:@"merchant"];
+    [self addMenuEntry:entryKeySupport text:BC_STRING_SUPPORT icon:@"help"];
+    [self addMenuEntry:entryKeyLogout text:BC_STRING_LOGOUT icon:@"logout"];
 
     if ([app.wallet isBuyEnabled]) {
-        [self addMenuEntry:BC_STRING_BUY_BITCOIN icon:@"bitcoin"];
+        [self addMenuEntry:entryKeyBuyBitcoin text:BC_STRING_BUY_BITCOIN icon:@"bitcoin"];
     }
 
     [self setSideMenuGestures];
@@ -193,9 +204,9 @@ int accountEntries = 0;
 
 - (void)reloadTableViewSize
 {
-    self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width - sideMenu.anchorLeftPeekAmount, MENU_ENTRY_HEIGHT * self.menuEntries + BALANCE_ENTRY_HEIGHT * (balanceEntries + 1) + SECTION_HEADER_HEIGHT);
+    self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width - sideMenu.anchorLeftPeekAmount, MENU_ENTRY_HEIGHT * self.menuEntriesCount + BALANCE_ENTRY_HEIGHT * (balanceEntries + 1) + SECTION_HEADER_HEIGHT);
     if (![self showBalances]) {
-        self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width - sideMenu.anchorLeftPeekAmount, MENU_ENTRY_HEIGHT * self.menuEntries);
+        self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width - sideMenu.anchorLeftPeekAmount, MENU_ENTRY_HEIGHT * self.menuEntriesCount);
     }
     
     // If the tableView is bigger than the screen, enable scrolling and resize table view to screen size
@@ -284,38 +295,28 @@ int accountEntries = 0;
     }
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
-    NSInteger row = indexPath.row;
-    BOOL didUpgradeToHD = app.wallet.didUpgradeToHd;
 
-    switch (row) {
-        case EntryUpgradeBackup:
-            if (didUpgradeToHD) {
-                [app backupFundsClicked:nil];
-            } else {
-                [app showHdUpgrade];
-            }
-            break;
-        case EntryAccountsAndAddresses:
-            [app accountsAndAddressesClicked:nil];
-            break;
-        case EntrySettings:
-            [app accountSettingsClicked:nil];
-            break;
-        case EntryMerchantMap:
-            [app merchantClicked:nil];
-            break;
-        case EntrySupport:
-            [app supportClicked:nil];
-            break;
-        case EntryLogout:
-            [app logoutClicked:nil];
-            break;
-        case EntryBuyBitcoin:
-            [app buyBitcoinClicked:nil];
-            break;
-        default:
-            break;
+    NSString *rowKey = [self getMenuEntry:indexPath.row][@"key"];
+
+    if (rowKey == entryKeyUpgradeBackup) {
+        BOOL didUpgradeToHD = app.wallet.didUpgradeToHd;
+        if (didUpgradeToHD) {
+            [app backupFundsClicked:nil];
+        } else {
+            [app showHdUpgrade];
+        }
+    } else if (rowKey == entryKeyAccountsAndAddresses) {
+        [app accountsAndAddressesClicked:nil];
+    } else if (rowKey == entryKeySettings) {
+        [app accountSettingsClicked:nil];
+    } else if (rowKey == entryKeyMerchantMap) {
+        [app merchantClicked:nil];
+    } else if (rowKey == entryKeySupport) {
+        [app supportClicked:nil];
+    } else if (rowKey == entryKeyLogout) {
+        [app logoutClicked:nil];
+    } else if (rowKey == entryKeyBuyBitcoin) {
+        [app buyBitcoinClicked:nil];
     }
 }
 
@@ -397,13 +398,13 @@ int accountEntries = 0;
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)sectionIndex
 {
     if (![self showBalances]) {
-        return self.menuEntries;
+        return self.menuEntriesCount;
     }
     if (sectionIndex == 0) {
         return balanceEntries;
     }
     if (sectionIndex == 1) {
-        return self.menuEntries;
+        return self.menuEntriesCount;
     }
     
     return balanceEntries;
@@ -428,9 +429,10 @@ int accountEntries = 0;
             cell.selectedBackgroundView = v;
         }
 
-        cell.textLabel.text = self.titles[indexPath.row];
+        NSDictionary *entry = [self getMenuEntry:indexPath.row];
+        cell.textLabel.text = entry[@"text"];
         cell.textLabel.adjustsFontSizeToFitWidth = YES;
-        cell.imageView.image = [UIImage imageNamed:self.images[indexPath.row]];
+        cell.imageView.image = [UIImage imageNamed:entry[@"icon"]];
         
         return cell;
     }
