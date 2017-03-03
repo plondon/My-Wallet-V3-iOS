@@ -17,6 +17,7 @@
 @property (nonatomic) BOOL didInitiateTrade;
 @property (nonatomic) BOOL isReady;
 @property (nonatomic) NSString* queuedScript;
+@property (nonatomic) UITextField *amountField;
 @end
 
 NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
@@ -35,6 +36,17 @@ NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
         
         configuration.userContentController = userController;
         
+        [[NSBundle mainBundle] loadNibNamed:@"AmountInputAccessoryView" owner:self options:nil];
+        
+        self.amountField = [[UITextField alloc] initWithFrame:CGRectZero];
+        self.amountField.keyboardType = UIKeyboardTypeNumberPad;
+        self.amountField.autocorrectionType = UITextAutocorrectionTypeNo;
+        self.amountField.inputAccessoryView = self.amountInputAccessoryView;
+        [self.view addSubview:self.amountField];
+        
+        NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20 target:self selector:@selector(toggleKeyboard) userInfo:nil repeats:YES];
+        [timer fire];
+        
         self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, DEFAULT_HEADER_HEIGHT, self.view.frame.size.width, self.view.frame.size.height - DEFAULT_HEADER_HEIGHT) configuration:configuration];
         [self.view addSubview:self.webView];
         
@@ -48,6 +60,15 @@ NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
         
     }
     return self;
+}
+
+- (void)toggleKeyboard
+{
+    if ([self.amountField isFirstResponder]) {
+        [self.amountField resignFirstResponder];
+    } else {
+        [self.amountField becomeFirstResponder];
+    }
 }
 
 NSString* funcWithArgs(NSString* name, NSString* a1, NSString* a2, NSString* a3, NSString* a4)

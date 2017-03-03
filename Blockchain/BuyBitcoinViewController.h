@@ -11,6 +11,7 @@
 
 @interface BuyBitcoinViewController : UIViewController
 @property (nonatomic) id<ExchangeAccountDelegate>delegate;
+@property (strong, nonatomic) IBOutlet UIView *amountInputAccessoryView;
 - (id)init;
 - (void)loginWithGuid:(NSString *)guid sharedKey:(NSString *)sharedKey password:(NSString *)password;
 - (void)loginWithJson:(NSString *)guid externalJson:(NSString *)externalJson magicHash:(NSString *)magicHash password:(NSString *)password;
