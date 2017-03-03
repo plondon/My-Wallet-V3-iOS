@@ -106,13 +106,14 @@ int accountEntries = 0;
 
     [self addMenuEntry:entryKeySettings text:BC_STRING_SETTINGS icon:@"settings"];
     [self addMenuEntry:entryKeyAccountsAndAddresses text:BC_STRING_ADDRESSES icon:@"wallet"];
-    [self addMenuEntry:entryKeyMerchantMap text:BC_STRING_MERCHANT_MAP icon:@"merchant"];
-    [self addMenuEntry:entryKeySupport text:BC_STRING_SUPPORT icon:@"help"];
-    [self addMenuEntry:entryKeyLogout text:BC_STRING_LOGOUT icon:@"logout"];
-
+    
     if ([app.wallet isBuyEnabled]) {
         [self addMenuEntry:entryKeyBuyBitcoin text:BC_STRING_BUY_BITCOIN icon:@"bitcoin"];
     }
+    
+    [self addMenuEntry:entryKeyMerchantMap text:BC_STRING_MERCHANT_MAP icon:@"merchant"];
+    [self addMenuEntry:entryKeySupport text:BC_STRING_SUPPORT icon:@"help"];
+    [self addMenuEntry:entryKeyLogout text:BC_STRING_LOGOUT icon:@"logout"];
 
     [self setSideMenuGestures];
     [self reload];
