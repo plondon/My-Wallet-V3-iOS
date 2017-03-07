@@ -494,6 +494,7 @@
 #define BC_STRING_PRIVATE_KEY_NEEDED NSLocalizedString(@"Private Key Needed", nil)
 #define BC_STRING_PRIVATE_KEY_NEEDED_MESSAGE_ARGUMENT NSLocalizedString(@"This action requires the private key for the Bitcoin address %@. Please scan the QR code.", nil)
 #define BC_STRING_ENTER_ARGUMENT_AMOUNT NSLocalizedString(@"Enter %@ amount", nil)
+#define BC_STRING_ENTER_AMOUNT NSLocalizedString(@"Enter amount", nil)
 #define BC_STRING_RETRIEVING_RECOMMENDED_FEE NSLocalizedString(@"Retrieving recommended fee", nil)
 #define BC_STRING_FEE_HIGHER_THAN_RECOMMENDED_ARGUMENT_SUGGESTED_ARGUMENT NSLocalizedString(@"You specified an unusually high transaction fee of %@. Even if you lower the fee to %@, you can expect the transaction to confirm within the next 10 minutes (one block).", nil)
 #define BC_STRING_FEE_LOWER_THAN_RECOMMENDED_ARGUMENT_SUGGESTED_ARGUMENT NSLocalizedString(@"You specified an exceptionally small transaction fee of %@. Your transaction may be stuck and possibly never be confirmed. To increase the likelihood for your transaction to confirm within approximately one hour (six blocks), we strongly recommend a fee of no less than %@.", nil)

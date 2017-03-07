@@ -11,13 +11,17 @@
 #import <WebKit/WebKit.h>
 #import "NSString+NSString_EscapeQuotes.h"
 #import "RootService.h"
+#import "Blockchain-Swift.h"
 
-@interface BuyBitcoinViewController () <WKNavigationDelegate, WKScriptMessageHandler>
+@interface BuyBitcoinViewController () <WKNavigationDelegate, WKScriptMessageHandler, UITextFieldDelegate>
 @property (nonatomic) WKWebView *webView;
 @property (nonatomic) BOOL didInitiateTrade;
 @property (nonatomic) BOOL isReady;
 @property (nonatomic) NSString* queuedScript;
-@property (nonatomic) UITextField *amountField;
+
+@property (strong, nonatomic) IBOutlet BCSecureTextField *inputAccessoryAmountField;
+@property (nonatomic) UITextField *hiddenField;
+@property (nonatomic) NSString *currentFieldName;
 @end
 
 NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
@@ -33,19 +37,20 @@ NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
         
         [userController addScriptMessageHandler:self name:WEBKIT_HANDLER_BUY_COMPLETED];
         [userController addScriptMessageHandler:self name:WEBKIT_HANDLER_FRONTEND_INITIALIZED];
-        
+        [userController addScriptMessageHandler:self name:WEBKIT_HANDLER_AMOUNT_FIELD_FOCUSED];
+
         configuration.userContentController = userController;
         
         [[NSBundle mainBundle] loadNibNamed:@"AmountInputAccessoryView" owner:self options:nil];
         
-        self.amountField = [[UITextField alloc] initWithFrame:CGRectZero];
-        self.amountField.keyboardType = UIKeyboardTypeNumberPad;
-        self.amountField.autocorrectionType = UITextAutocorrectionTypeNo;
-        self.amountField.inputAccessoryView = self.amountInputAccessoryView;
-        [self.view addSubview:self.amountField];
+        self.hiddenField = [[UITextField alloc] initWithFrame:CGRectZero];
+        self.hiddenField.keyboardType = UIKeyboardTypeNumberPad;
+        self.hiddenField.autocorrectionType = UITextAutocorrectionTypeNo;
+        self.hiddenField.inputAccessoryView = self.amountInputAccessoryView;
+        [self.view addSubview:self.hiddenField];
         
-        NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20 target:self selector:@selector(toggleKeyboard) userInfo:nil repeats:YES];
-        [timer fire];
+        self.inputAccessoryAmountField.placeholder = BC_STRING_ENTER_AMOUNT;
+        [self.inputAccessoryAmountField addTarget:self action:@selector(textFieldChanged) forControlEvents:UIControlEventEditingChanged];
         
         self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, DEFAULT_HEADER_HEIGHT, self.view.frame.size.width, self.view.frame.size.height - DEFAULT_HEADER_HEIGHT) configuration:configuration];
         [self.view addSubview:self.webView];
@@ -60,15 +65,6 @@ NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
         
     }
     return self;
-}
-
-- (void)toggleKeyboard
-{
-    if ([self.amountField isFirstResponder]) {
-        [self.amountField resignFirstResponder];
-    } else {
-        [self.amountField becomeFirstResponder];
-    }
 }
 
 NSString* funcWithArgs(NSString* name, NSString* a1, NSString* a2, NSString* a3, NSString* a4)
@@ -110,6 +106,12 @@ NSString* funcWithArgs(NSString* name, NSString* a1, NSString* a2, NSString* a3,
 {
     DLog(@"Received script message: '%@'", message.name);
     
+    if ([message.name isEqualToString:WEBKIT_HANDLER_AMOUNT_FIELD_FOCUSED]) {
+        self.currentFieldName = message.body;
+        self.hiddenField.delegate = self;
+        [self.hiddenField becomeFirstResponder];
+    }
+    
     if ([message.name isEqual: WEBKIT_HANDLER_FRONTEND_INITIALIZED]) {
         self.isReady = YES;
         if (self.queuedScript != nil) {
@@ -120,6 +122,27 @@ NSString* funcWithArgs(NSString* name, NSString* a1, NSString* a2, NSString* a3,
     if ([message.name isEqual: WEBKIT_HANDLER_BUY_COMPLETED]) {
         self.didInitiateTrade = YES;
     }
+}
+
+- (IBAction)doneButtonClicked:(UIButton *)sender
+{
+    self.hiddenField.delegate = nil;
+    
+    [self.inputAccessoryAmountField resignFirstResponder];
+    [self.hiddenField resignFirstResponder];
+}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(ANIMATION_DURATION * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self.inputAccessoryAmountField becomeFirstResponder];
+    });
+    return YES;
+}
+
+- (void)textFieldChanged
+{
+    [self runScript:[NSString stringWithFormat:@"inputForAmountField('%@', '%@')", self.inputAccessoryAmountField.text, self.currentFieldName]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
