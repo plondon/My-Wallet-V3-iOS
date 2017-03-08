@@ -50,6 +50,14 @@ NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
     return self;
 }
 
+- (void) webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler {
+    if (app.certificatePinner) {
+        [app.certificatePinner respondToChallenge:challenge completionHandler:completionHandler];
+    } else {
+        completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
+    }
+}
+
 NSString* funcWithArgs(NSString* name, NSString* a1, NSString* a2, NSString* a3, NSString* a4)
 {
     return [ NSString stringWithFormat:@"%@('%@','%@','%@','%@')", name, [a1 escapeStringForJS], [a2 escapeStringForJS], [a3 escapeStringForJS], [a4 escapeStringForJS] ];
