@@ -20,6 +20,9 @@
 
 @property (nonatomic) BOOL shouldHideBusyView;
 
+// Override required for image picker
+@property(nonatomic, copy) void (^presentViewControllerBlock)(UIViewController *viewController, BOOL animated, id completion);
+
 - (id)initWithRootViewController:(UIViewController *)rootViewController title:(NSString *)title;
 - (void)showBusyViewWithLoadingText:(NSString *)text;
 - (void)hideBusyView;

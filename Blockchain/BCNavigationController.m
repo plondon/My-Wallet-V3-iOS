@@ -172,4 +172,13 @@
     });
 }
 
+- (void)presentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completion
+{
+    if (self.presentViewControllerBlock) {
+        self.presentViewControllerBlock(viewControllerToPresent, flag, completion);
+    } else {
+        [super presentViewController:viewControllerToPresent animated:flag completion:completion];
+    }
+}
+
 @end

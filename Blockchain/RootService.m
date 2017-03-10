@@ -1499,6 +1499,9 @@ void (^secondPasswordSuccess)(NSString *);
     [self.buyBitcoinViewController loginWithJson:walletJson externalJson:externalJson magicHash:magicHash password:self.wallet.password];
     self.buyBitcoinViewController.delegate = app.wallet;
     BCNavigationController *navigationController = [[BCNavigationController alloc] initWithRootViewController:self.buyBitcoinViewController title:BC_STRING_BUY_BITCOIN];
+    navigationController.presentViewControllerBlock = ^(UIViewController *viewController, BOOL animated, id completion){
+        [self.buyBitcoinViewController presentViewController:viewController animated:animated completion:nil];
+    };
     [_tabViewController presentViewController:navigationController animated:YES completion:nil];
 }
 
