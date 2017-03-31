@@ -45,7 +45,8 @@ NSString* funcWithArgs(NSString*, NSString*, NSString*, NSString*, NSString*);
         self.automaticallyAdjustsScrollViewInsets = NO;
         
         NSURL *login = [NSURL URLWithString:URL_BUY_WEBVIEW];
-        NSURLRequest *request = [NSURLRequest requestWithURL:login cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval: 10.0];
+        NSURLRequest *request = [NSURLRequest requestWithURL:login];
+//        NSURLRequest *request = [NSURLRequest requestWithURL:login cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval: 10.0];
         [self.webView loadRequest:request];
         
     }
@@ -90,12 +91,12 @@ NSString* funcWithArgs(NSString* name, NSString* a1, NSString* a2, NSString* a3,
 
 - (void)runScript:(NSString *)script
 {
-    [self.webView evaluateJavaScript:script completionHandler:^(id result, NSError * _Nullable error) {
-        DLog(@"Ran script with result %@, error %@", result, error);
-        if (error != nil) {
-            [app standardNotify:[NSString stringWithFormat:@"%@: %@",[error localizedDescription], error.userInfo]];
-        }
-    }];
+//    [self.webView evaluateJavaScript:script completionHandler:^(id result, NSError * _Nullable error) {
+//        DLog(@"Ran script with result %@, error %@", result, error);
+//        if (error != nil) {
+//            [app standardNotify:[NSString stringWithFormat:@"%@: %@",[error localizedDescription], error.userInfo]];
+//        }
+//    }];
 }
 
 - (void)runScriptWhenReady:(NSString *)script

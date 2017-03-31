@@ -284,7 +284,7 @@ green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/
 #define PRODUCTION_WEBSOCKET_SERVER @"wss://blockchain.info/inv"
 #define PRODUCTION_MERCHANT_URL @"https://api.blockchain.info/merchant"
 #define PRODUCTION_API_URL @"https://api.blockchain.info"
-#define PRODUCTION_BUY_WEBVIEW_URL @"https://blockchain.info/wallet/#/intermediate"
+#define PRODUCTION_BUY_WEBVIEW_URL @"http://local.blockchain.com:8080/"
 
 #define DEV_WALLET_SERVER PRODUCTION_WALLET_SERVER
 #define DEV_WEBSOCKET_SERVER PRODUCTION_WEBSOCKET_SERVER
